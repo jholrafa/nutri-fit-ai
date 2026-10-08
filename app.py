@@ -175,13 +175,11 @@ with aba_metas:
     )
 
   if st.button("🔥 Calcular Minha Meta Fit"):
-    # Cálculo básico de TDEE (Mifflin-St Jeor)
     if genero == "Masculino":
       tmb = 10 * peso + 6.25 * altura - 5 * idade + 5
     else:
       tmb = 10 * peso + 6.25 * altura - 5 * idade - 161
 
-    # Fator de atividade
     if "Sedentário" in nivel_atividade:
       tdee = tmb * 1.2
     elif "Levemente" in nivel_atividade:
@@ -191,7 +189,6 @@ with aba_metas:
     else:
       tdee = tmb * 1.725
 
-    # Ajuste por objetivo
     if "Recomposição" in objetivo:
       calorias_alvo = int(tdee)
     elif "Cutting" in objetivo:
@@ -199,7 +196,7 @@ with aba_metas:
     else:
       calorias_alvo = int(tdee - 500)
 
-    proteina_alvo = int(peso * 2.2)  # Base segura em gramas
+    proteina_alvo = int(peso * 2.2)
 
     st.success("🎯 Metas Calculadas com Sucesso!")
     col_m1, col_m2, col_m3 = st.columns(3)
@@ -240,11 +237,9 @@ with aba_scanner:
             "Analisando imagem e estimando macros com inteligência artificial..."
         ):
           try:
-            # Salvando imagem temporariamente para envio à API
             caminho_temp = "temp_prato.jpg"
             imagem.save(caminho_temp)
 
-            # Bloco Anti-Tijolo / Blindagem Visual (Exemplo de validação rápida)
             resposta = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -418,3 +413,10 @@ with aba_exercicios:
         " **Progressão de Carga:** A panturrilha exige volume e intensidade;"
         " trabalhe com amplitudes máximas."
     )
+
+st.markdown("---")
+st.markdown(
+    "<p style='text-align: center; color: #707070; font-size: 0.8rem;'>Nutri"
+    " Fit AI © 2026 - Alta Performance & Inteligência Artificial</p>",
+    unsafe_allow_html=True,
+)
