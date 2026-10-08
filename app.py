@@ -1,25 +1,24 @@
 import base64
 import json
 from io import BytesIO
-from openai import OpenAI
+import os  # <--- Biblioteca que o Python usa para ler as chaves do sistema
+from openai import OpenAI  # <--- Biblioteca oficial da OpenAI
 from PIL import Image
 import streamlit as st
 
 # --- CONFIGURAÇÃO VISUAL ---
 st.set_page_config(
-    page_title="Nutri Fit AI | Performance & Hardware",
+    page_title="Nutri Fit AI | Performance & Dieta",
     page_icon="🏋️‍♂️",
     layout="centered",
 )
 
-# --- CSS PERSONALIZADO (FUNDO DE ACADEMIA + TEMA FIT) ---
-# Usamos uma imagem de alta qualidade de academia/pesos com um overlay escuro
+# --- CSS PERSONALIZADO (FUNDO DE ACADEMIA) ---
 url_fundo_academia = "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1920&auto=format&fit=crop"
 
 st.markdown(
     f"""
     <style>
-    /* Fundo geral da aplicação com imagem de academia e escurecimento */
     .stApp {{
         background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), 
                     url("{url_fundo_academia}");
@@ -27,14 +26,10 @@ st.markdown(
         background-position: center;
         background-attachment: fixed;
     }}
-
-    /* Estilização dos títulos */
     h1, h2, h3 {{
         color: #39FF14 !important;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
     }}
-
-    /* Caixa de destaque para os blocos (cards translúcidos) */
     div.stTabs [data-baseweb="tab-panel"] {{
         background-color: rgba(20, 20, 20, 0.85);
         padding: 25px;
@@ -42,14 +37,6 @@ st.markdown(
         border: 1px solid #333;
         box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.7);
     }}
-
-    /* Ajuste das abas */
-    .stTabs button {{
-        font-weight: bold;
-        color: #FAFAFA !important;
-    }}
-
-    /* Estilo dos botões principais */
     .stButton>button {{
         background-color: #39FF14 !important;
         color: #000000 !important;
@@ -57,24 +44,29 @@ st.markdown(
         border-radius: 8px;
         border: none;
         box-shadow: 0px 0px 10px rgba(57, 255, 20, 0.4);
-        transition: 0.3s;
-    }}
-    
-    .stButton>button:hover {{
-        background-color: #32cd32 !important;
-        box-shadow: 0px 0px 15px rgba(57, 255, 20, 0.8);
     }}
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-# --- CONEXÃO COM IA LOCAL ---
+# --- CONFIGURAÇÃO DA CHAVE DA OPENAI ---
+# O Python vai ler a chave automaticamente da variável de ambiente chamada OPENAI_API_KEY
+# Se a chave não estiver configurada, ele avisa na tela para você configurar.
 try:
-  client = OpenAI(base_url="http://192.168.18.195:1234/v1", api_key="lm-studio")
+  api_key = os.environ.get("OPENAI_API_KEY")
+  if not api_key:
+    st.error(
+        "⚠️ ATENÇÃO: A chave da OpenAI (OPENAI_API_KEY) não foi encontrada no"
+        " sistema. Configure a chave no seu terminal antes de rodar."
+    )
+    client = None
+  else:
+    # Cria o cliente oficial da OpenAI usando a sua chave de backend
+    client = OpenAI(api_key=api_key)
 except Exception as e:
-  st.error(f"Erro ao conectar com o cliente OpenAI: {e}")
-  st.stop()
+  st.error(f"Erro ao inicializar o cliente OpenAI: {e}")
+  client = None
 
 
 # Função para converter imagem para base64
@@ -90,8 +82,8 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.markdown(
-    "<h3 style='text-align: center; color: #FAFAFA !important;'>Força,"
-    " Disciplina e Precisão na Dieta.</h3>",
+    "<h3 style='text-align: center; color: #FAFAFA !important;'>O seu personal"
+    " nutricionista com IA na nuvem.</h3>",
     unsafe_allow_html=True,
 )
 
@@ -100,19 +92,12 @@ aba1, aba2 = st.tabs(["📊 Definir Metas", "📸 Scannear Prato"])
 
 with aba1:
   st.header("📊 Defina suas Metas e Perfil")
-  st.write(
-      "Preencha seus dados para calcularmos seu TDEE e macros de alta"
-      " performance."
-  )
+  st.write("Preencha seus dados para calcularmos seu TDEE e macros ideais.")
 
   col1, col2 = st.columns(2)
   with col1:
-    peso = st.number_input(
-        "Peso (kg)", value=80.0, step=0.5, help="Seu peso corporal atual."
-    )
-    altura = st.number_input(
-        "Altura (cm)", value=175.0, step=1.0, help="Sua altura em centímetros."
-    )
+    peso = st.number_input("Peso (kg)", value=80.0, step=0.5)
+    altura = st.number_input("Altura (cm)", value=175.0, step=1.0)
     idade = st.number_input("Idade", value=41, step=1)
 
   with col2:
@@ -162,20 +147,16 @@ with aba1:
 
     meta_proteina = peso * proteina_por_kg
 
-    st.success("✅ Metas Calculadas com Sucesso! Bora pra cima!")
-
+    st.success("✅ Metas Calculadas com Sucesso!")
     m1, m2, m3 = st.columns(3)
     m1.metric("🔥 Gasto Basal (TMB)", f"{int(tmb)} kcal")
     m2.metric("🎯 Meta Diária", f"{int(calorias_meta)} kcal")
     m3.metric("🍗 Meta de Proteína", f"{int(meta_proteina)}g")
 
 with aba2:
-  st.header("📸 Scannear Prato com IA Local")
+  st.header("📸 Scannear Prato com IA")
   st.write("Tire uma foto ou suba a imagem do seu rango para análise rápida.")
 
-  modelo_local = st.text_input(
-      "Nome do modelo carregado no LM Studio", value="qwen2-vl-7b-instruct"
-  )
   arquivo_foto = st.file_uploader(
       "Escolha a foto do prato...", type=["jpg", "jpeg", "png"]
   )
@@ -190,46 +171,54 @@ with aba2:
     )
 
     if st.button("🔍 Analisar Refeição"):
-      with st.spinner("🧠 Processando imagem no seu hardware local..."):
-        try:
-          base64_img = imagem_para_base64(imagem)
-
-          prompt_sistema = (
-              "Você é um nutricionista especialista em performance esportiva. Analise a imagem deste"
-              " prato de comida. Identifique os alimentos visíveis, estime o peso"
-              " aproximado de cada item e retorne estritamente um JSON com o seguinte"
-              ' formato (sem usar blocos de código markdown ou crases, apenas'
-              ' o texto do JSON puro): {"alimentos": [{"nome": "...",'
-              ' "peso_g": ...}], "total_calorias": ...,'
-              ' "total_proteinas_g": ...}'
-          )
-
-          resposta = client.chat.completions.create(
-              model=modelo_local,
-              messages=[{
-                  "role": "user",
-                  "content": [
-                      {"type": "text", "text": prompt_sistema},
-                      {
-                          "type": "image_url",
-                          "image_url": {
-                              "url": f"data:image/jpeg;base64,{base64_img}"
-                          },
-                      },
-                  ],
-              }],
-              max_tokens=600,
-          )
-
-          texto_resposta = resposta.choices[0].message.content
-          texto_limpo = (
-              texto_resposta.replace("```json", "")
-              .replace("```", "")
-              .strip()
-          )
-
-          st.subheader("📋 Resultado da Análise:")
+      if not client:
+        st.error(
+            "❌ O cliente da OpenAI não está configurado. Verifique a chave da"
+            " API."
+        )
+      else:
+        with st.spinner(
+            "🧠 Processando imagem na API oficial da OpenAI (GPT-4o-mini)..."
+        ):
           try:
+            base64_img = imagem_para_base64(imagem)
+
+            prompt_sistema = (
+                "Você é um nutricionista especialista em performance"
+                " esportiva. Analise a imagem deste prato de comida."
+                " Identifique os alimentos visíveis, estime o peso aproximado"
+                " de cada item e retorne estritamente um JSON com o seguinte"
+                ' formato (sem markdown ou crases, apenas o JSON puro):'
+                ' {"alimentos": [{"nome": "...", "peso_g": ...}], '
+                '"total_calorias": ..., "total_proteinas_g": ...}'
+            )
+
+            # Chamada direta para o modelo inteligente da OpenAI na nuvem
+            resposta = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt_sistema},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{base64_img}"
+                            },
+                        },
+                    ],
+                }],
+                max_tokens=600,
+            )
+
+            texto_resposta = resposta.choices[0].message.content
+            texto_limpo = (
+                texto_resposta.replace("```json", "")
+                .replace("```", "")
+                .strip()
+            )
+
+            st.subheader("📋 Resultado da Análise:")
             dados_json = json.loads(texto_limpo)
 
             cal_ref = dados_json.get("total_calorias", 0)
@@ -246,23 +235,12 @@ with aba2:
             with st.expander("Ver JSON Bruto"):
               st.json(dados_json)
 
-          except json.JSONDecodeError:
-            st.error(
-                "❌ Erro ao ler os dados retornados pela IA. O modelo retornou"
-                " formato inválido."
-            )
-            st.code(texto_limpo)
+          except Exception as e:
+            st.error(f"❌ Erro ao processar a imagem na API: {e}")
 
-        except Exception as e:
-          st.error(
-              f"❌ Erro ao conectar com o servidor local. O LM Studio está com o"
-              f" servidor ligado? Erro: {e}"
-          )
-
-# --- RODAPÉ ---
 st.markdown("---")
 st.markdown(
-    "<p style='text-align: center; color: #aaa; text-shadow: 1px 1px 2px"
-    " rgba(0,0,0,0.9);'>Desenvolvido por Papai Tech Inc. | 100% Local</p>",
+    "<p style='text-align: center; color: #aaa;'>Desenvolvido por Papai Tech"
+    " Inc.</p>",
     unsafe_allow_html=True,
 )
