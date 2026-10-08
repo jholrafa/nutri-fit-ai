@@ -49,13 +49,17 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Inicialização do Cliente OpenAI
-api_key = os.environ.get("OPENAI_API_KEY")
+# Inicialização Blindada do Cliente OpenAI via Streamlit Secrets
+api_key = None
+try:
+  if "OPENAI_API_KEY" in st.secrets:
+    api_key = st.secrets["OPENAI_API_KEY"]
+except Exception:
+  pass
+
+# Fallback para variável de ambiente local se houver
 if not api_key:
-  try:
-    api_key = st.secrets.get("OPENAI_API_KEY")
-  except Exception:
-    pass
+  api_key = os.environ.get("OPENAI_API_KEY")
 
 client = OpenAI(api_key=api_key) if api_key else None
 
@@ -255,7 +259,7 @@ with aba_scanner:
     st.image(
         imagem_para_analise,
         caption="Refeição capturada para análise da IA",
-        use_column_width=True,
+        use_container_width=True,
     )
 
     col_input1, col_input2 = st.columns(2)
@@ -356,7 +360,7 @@ with aba_exercicios:
   def exibir_foto_exercicio(nome_arquivo, caption_texto):
     caminho = os.path.join("assets", nome_arquivo)
     if os.path.exists(caminho):
-      st.image(caminho, caption=caption_texto, use_column_width=True)
+      st.image(caminho, caption=caption_texto, use_container_width=True)
     else:
       st.warning(
           f"⚠️ Imagem '{nome_arquivo}' não encontrada na pasta 'assets'."
