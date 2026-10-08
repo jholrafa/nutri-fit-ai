@@ -282,10 +282,10 @@ with aba_scanner:
 # ABA 3: GUIA DE EXERCÍCIOS & SUBGRUPOS
 # ==========================================
 with aba_exercicios:
-  st.markdown("### 🏋️‍♂️ Guia Técnico de Exercícios & Ilustrações")
+  st.markdown("### 🏋️‍♂️ Guia Técnico de Exercícios por Subgrupo")
   st.write(
-      "Consulte os agrupamentos musculares, orientações de execução, foco em"
-      " hipertrofia e imagens ilustrativas."
+      "Consulte os agrupamentos musculares, orientações de execução e foco em"
+      " hipertrofia."
   )
 
   subgrupo = st.selectbox(
@@ -303,120 +303,84 @@ with aba_exercicios:
   )
 
   if "Peitoral" in subgrupo:
-    st.markdown("#### 💥 Foco: Peitoral (Superiores)")
-    st.image(
-        "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=1000&auto=format&fit=crop",
-        caption="Treino de Peitoral e Supino",
-        use_column_width=True,
-    )
-    st.markdown(
-        "- **Principais Exercícios:** Supino Reto com Barra, Supino Inclinado com"
-        " Halteres, Crucifixo na Polia.\n- **Dica de Ouro:** Mantenha as"
-        " escápulas deprimidas e retraídas no banco. Amplitude completa na"
-        " fase excêntrica (alongamento).\n- **Progressão de Carga:** Aumente o"
-        " peso apenas quando dominar 3 séries de 8 a 10 repetições com execução"
-        " perfeita."
+    st.markdown("#### 💥 Alvo: Peitoral (Superiores)")
+    st.info(
+        "🎯 **Músculos Envolvidos:** Grande peitoral (feixes clavicular e"
+        " esternal), deltóide anterior e tríceps.\n\n- **Principais Exercícios:"
+        "** Supino Reto com Barra, Supino Inclinado com Halteres, Crucifixo na"
+        " Polia.\n- **Dica de Ouro:** Mantenha as escápulas deprimidas e"
+        " retraídas no banco. Amplitude completa na fase excêntrica"
+        " (alongamento).\n- **Progressão de Carga:** Aumente o peso apenas"
+        " quando dominar 3 séries de 8 a 10 repetições com execução perfeita."
     )
   elif "Dorsal" in subgrupo:
-    st.markdown("#### 💥 Foco: Costas / Dorsal (Superiores)")
-    st.image(
-        "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1000&auto=format&fit=crop",
-        caption="Treino de Dorsal e Puxadas",
-        use_column_width=True,
-    )
-    st.markdown(
-        "- **Principais Exercícios:** Puxada Alta na Polia, Remada Curvada com"
-        " Barra, Remada Baixa.\n- **Dica de Ouro:** Puxe com os cotovelos em"
-        " direção ao quadril, focando em esmagar as dorsais.\n- **Progressão"
-        " de Carga:** Mantenha a coluna neutra e firme em todas as repetições."
+    st.markdown("#### 💥 Alvo: Costas / Dorsal (Superiores)")
+    st.info(
+        "🎯 **Músculos Envolvidos:** Grande dorsal, redondo maior, rombóides,"
+        " trapézio inferior e bíceps.\n\n- **Principais Exercícios:** Puxada"
+        " Alta na Polia, Remada Curvada com Barra, Remada Baixa.\n- **Dica de"
+        " Ouro:** Puxe com os cotovelos em direção ao quadril, focando em"
+        " esmagar as dorsais.\n- **Progressão de Carga:** Mantenha a coluna"
+        " neutra e firme em todas as repetições."
     )
   elif "Bíceps" in subgrupo:
-    st.markdown("#### 💥 Foco: Bíceps (Superiores)")
-    st.image(
-        "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1000&auto=format&fit=crop",
-        caption="Treino de Bíceps e Braços",
-        use_column_width=True,
-    )
-    st.markdown(
-        "- **Principais Exercícios:** Rosca Direta com Barra W, Rosca Alternada"
-        " com Halteres, Rosca Scott.\n- **Dica de Ouro:** Evite balançar o"
-        " tronco. O controle na descida (fase excêntrica) rompe as"
-        " fibras.\n- **Progressão de Carga:** Ajuste a carga de forma"
-        " progressiva sem comprometer a postura."
+    st.markdown("#### 💥 Alvo: Bíceps (Superiores)")
+    st.info(
+        "🎯 **Músculos Envolvidos:** Bíceps braquial (cabeças curta e longa),"
+        " braquial anterior e braquiorradial.\n\n- **Principais Exercícios:**"
+        " Rosca Direta com Barra W, Rosca Alternada com Halteres, Rosca"
+        " Scott.\n- **Dica de Ouro:** Evite balançar o tronco. O controle na"
+        " descida (fase excêntrica) rompe as fibras.\n- **Progressão de"
+        " Carga:** Ajuste a carga de forma progressiva sem comprometer a"
+        " postura."
     )
   elif "Tríceps" in subgrupo:
-    st.markdown("#### 💥 Foco: Tríceps (Superiores)")
-    st.image(
-        "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000&auto=format&fit=crop",
-        caption="Treino de Tríceps",
-        use_column_width=True,
-    )
-    st.markdown(
-        "- **Principais Exercícios:** Tríceps na Polia (Corda ou Barra Reta),"
-        " Tríceps Testa, Supino Fechado.\n- **Dica de Ouro:** Mantenha os"
-        " cotovelos fixos ao lado do corpo para isolar o tríceps.\n-"
-        " **Progressão de Carga:** Busque falha concêntrica segura nas últimas"
-        " séries."
+    st.markdown("#### 💥 Alvo: Tríceps (Superiores)")
+    st.info(
+        "🎯 **Músculos Envolvidos:** Tríceps braquial (cabeças lateral, medial"
+        " e longa).\n\n- **Principais Exercícios:** Tríceps na Polia (Corda ou"
+        " Barra Reta), Tríceps Testa, Supino Fechado.\n- **Dica de Ouro:**"
+        " Mantenha os cotovelos fixos ao lado do corpo para isolar o"
+        " tríceps.\n- **Progressão de Carga:** Busque falha concêntrica segura"
+        " nas últimas séries."
     )
   elif "Deltoides" in subgrupo:
-    st.markdown("#### 💥 Foco: Deltoides / Ombros (Superiores)")
-    st.image(
-        "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=1000&auto=format&fit=crop",
-        caption="Treino de Ombros e Deltoides",
-        use_column_width=True,
-    )
-    st.markdown(
-        "- **Principais Exercícios:** Desenvolvimento com Halteres, Elevação"
-        " Lateral na Polia, Crucifixo Inverso.\n- **Dica de Ouro:** O feixe"
-        " lateral do ombro dá a largura visual do tronco; foque na elevação"
-        " lateral controlada.\n- **Progressão de Carga:** Use cargas moderadas"
-        " com foco na conexão mente-músculo."
+    st.markdown("#### 💥 Alvo: Deltoides / Ombros (Superiores)")
+    st.info(
+        "🎯 **Músculos Envolvidos:** Feixes anterior, lateral e posterior do"
+        " deltóide, além de trapézio.\n\n- **Principais Exercícios:**"
+        " Desenvolvimento com Halteres, Elevação Lateral na Polia, Crucifixo"
+        " Inverso.\n- **Dica de Ouro:** O feixe lateral do ombro dá a largura"
+        " visual do tronco; foque na elevação lateral controlada.\n- **Progressão"
+        " de Carga:** Use cargas moderadas com foco na conexão mente-músculo."
     )
   elif "Quadríceps" in subgrupo:
-    st.markdown("#### 💥 Foco: Quadríceps (Inferiores)")
-    st.image(
-        "https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=1000&auto=format&fit=crop",
-        caption="Treino de Pernas e Quadríceps",
-        use_column_width=True,
-    )
-    st.markdown(
-        "- **Principais Exercícios:** Agachamento Livre, Leg Press 45°, Cadeira"
-        " Extensora.\n- **Dica de Ouro:** Mantenha os calcanhares apoiados e o"
-        " tronco erguido para maximizar o recrutamento da coxa.\n-"
-        " **Progressão de Carga:** Respeite o intervalo de descanso (2 a 3"
-        " minutos) devido à alta demanda energética."
+    st.markdown("#### 💥 Alvo: Quadríceps (Inferiores)")
+    st.info(
+        "🎯 **Músculos Envolvidos:** Reto femoral, vasto lateral, vasto medial,"
+        " vasto intermédio.\n\n- **Principais Exercícios:** Agachamento Livre,"
+        " Leg Press 45°, Cadeira Extensora.\n- **Dica de Ouro:** Mantenha os"
+        " calcanhares apoiados e o tronco erguido para maximizar o"
+        " recrutamento da coxa.\n- **Progressão de Carga:** Respeite o intervalo"
+        " de descanso (2 a 3 minutos) devido à alta demanda energética."
     )
   elif "Posteriores" in subgrupo:
-    st.markdown("#### 💥 Foco: Posteriores de Coxa (Inferiores)")
-    st.image(
-        "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1000&auto=format&fit=crop",
-        caption="Treino de Posteriores e Glúteos",
-        use_column_width=True,
-    )
-    st.markdown(
-        "- **Principais Exercícios:** Stiff com Barra, Mesa Flexora, Cadeira"
-        " Flexora.\n- **Dica de Ouro:** Inicie o movimento jogando o quadril"
-        " para trás (dobradiça de quadril) antes de dobrar os joelhos.\n-"
-        " **Progressão de Carga:** Mantenha a tensão contínua na musculatura."
+    st.markdown("#### 💥 Alvo: Posteriores de Coxa (Inferiores)")
+    st.info(
+        "🎯 **Músculos Envolvidos:** Bíceps femoral, semitendíneo,"
+        " semimembranáceo e glúteos.\n\n- **Principais Exercícios:** Stiff com"
+        " Barra, Mesa Flexora, Cadeira Flexora.\n- **Dica de Ouro:** Inicie o"
+        " movimento jogando o quadril para trás (dobradiça de quadril) antes"
+        " de dobrar os joelhos.\n- **Progressão de Carga:** Mantenha a tensão"
+        " contínua na musculatura."
     )
   else:
-    st.markdown("#### 💥 Foco: Panturrilhas (Inferiores)")
-    st.image(
-        "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?q=80&w=1000&auto=format&fit=crop",
-        caption="Treino de Panturrilhas",
-        use_column_width=True,
-    )
-    st.markdown(
-        "- **Principais Exercícios:** Panturrilha em Pé na Máquina, Panturrilha"
-        " Sentado (Sóleo).\n- **Dica de Ouro:** Faça uma pausa de 1 segundo no"
-        " pico da contração em cima e alongue completamente embaixo.\n-"
-        " **Progressão de Carga:** A panturrilha exige volume e intensidade;"
+    st.markdown("#### 💥 Alvo: Panturrilhas (Inferiores)")
+    st.info(
+        "🎯 **Músculos Envolvidos:** Gastrocnêmio (lateral e medial) e sóleo."
+        "\n\n- **Principais Exercícios:** Panturrilha em Pé na Máquina,"
+        " Panturrilha Sentado (Sóleo).\n- **Dica de Ouro:** Faça uma pausa de 1"
+        " segundo no pico da contração em cima e alongue completamente embaixo."
+        "\n- **Progressão de Carga:** A panturrilha exige volume e intensidade;"
         " trabalhe com amplitudes máximas."
     )
-
-st.markdown("---")
-st.markdown(
-    "<p style='text-align: center; color: #707070; font-size: 0.8rem;'>Nutri"
-    " Fit AI © 2026 - Alta Performance & Inteligência Artificial</p>",
-    unsafe_allow_html=True,
-)
