@@ -63,9 +63,9 @@ client = OpenAI(api_key=api_key) if api_key else None
 if "historico_refeicoes" not in st.session_state:
   st.session_state.historico_refeicoes = []
 if "calorias_meta" not in st.session_state:
-  st.session_state.calorias_meta = 2000  # Valor padrão inicial
+  st.session_state.calorias_meta = 2000
 if "proteina_meta" not in st.session_state:
-  st.session_state.proteina_meta = 160  # Valor padrão inicial
+  st.session_state.proteina_meta = 160
 
 # Dicionário de dias da semana em português
 dias_semana_pt = {
@@ -98,7 +98,7 @@ st.markdown("---")
 aba_metas, aba_scanner, aba_exercicios = st.tabs(
     [
         "📊 Definir Metas & Dieta",
-        "📸 Scanner & Histórico Diário (IA)",
+        "📸 Scanner por Câmera & Histórico (IA)",
         "🏋️‍♂️ Guia Master de Exercícios & Anatomia 3D",
     ]
 )
@@ -165,7 +165,6 @@ with aba_metas:
 
     proteina_alvo = int(peso * 2.2)
 
-    # Salvando no session_state global do app
     st.session_state.calorias_meta = calorias_alvo
     st.session_state.proteina_meta = proteina_alvo
 
@@ -176,13 +175,13 @@ with aba_metas:
     col_m3.metric("Meta de Proteína", f"{proteina_alvo} g/dia")
 
 # ==========================================
-# ABA 2: SCANNER, HISTÓRICO & ACUMULADOR (IA)
+# ABA 2: SCANNER, HISTÓRICO, CÂMERA & ACUMULADOR
 # ==========================================
 with aba_scanner:
-  st.markdown("### 📸 Scanner Inteligente & Histórico de Hoje")
+  st.markdown("### 📸 Scanner Inteligente por Câmera & Histórico de Hoje")
   st.write(
-      "Envie a foto do seu prato. A IA analisa, calcula e acumula no seu"
-      " histórico diário."
+      "Tire a foto da refeição direto pela câmera ou envie um arquivo. A IA"
+      " calcula e acumula no seu dia."
   )
 
   # --- PAINEL DE RESUMO E ALERTAS DO DIA ---
@@ -212,7 +211,7 @@ with aba_scanner:
   diferenca_calorias = meta_c - total_calorias_consumidas
   if total_calorias_consumidas == 0:
     st.info(
-        "💡 **Status:** Nenhuma refeição registrada hoje. Envie a foto da sua"
+        "💡 **Status:** Nenhuma refeição registrada hoje. Tire a foto da sua"
         " primeira refeição abaixo!"
     )
   elif diferenca_calorias > 300:
@@ -233,19 +232,32 @@ with aba_scanner:
     )
   st.markdown("---")
 
-  arquivo_foto = st.file_uploader(
-      "Escolha a foto da refeição...", type=["jpg", "jpeg", "png"]
+  # Escolha entre Câmera Ao Vivo ou Upload de Arquivo
+  modo_captura = st.radio(
+      "Como deseja enviar a foto?",
+      ["📷 Tirar foto com a Câmera ao Vivo", "📁 Enviar arquivo de imagem"],
   )
 
-  if arquivo_foto is not None:
-    imagem = Image.open(arquivo_foto)
+  imagem_para_analise = None
+
+  if modo_captura == "📷 Tirar foto com a Câmera ao Vivo":
+    imagem_camera = st.camera_input("Posicione o prato e clique em 'Tirar foto'")
+    if imagem_camera is not None:
+      imagem_para_analise = Image.open(imagem_camera)
+  else:
+    arquivo_foto = st.file_uploader(
+        "Escolha o arquivo de foto...", type=["jpg", "jpeg", "png"]
+    )
+    if arquivo_foto is not None:
+      imagem_para_analise = Image.open(arquivo_foto)
+
+  if imagem_para_analise is not None:
     st.image(
-        imagem,
-        caption="Refeição pronta para análise da IA",
+        imagem_para_analise,
+        caption="Refeição capturada para análise da IA",
         use_column_width=True,
     )
 
-    # Campos manuais para a IA preencher ou para ajuste fino
     col_input1, col_input2 = st.columns(2)
     calorias_estimadas_input = col_input1.number_input(
         "Calorias Estimadas (kcal)", min_value=0, max_value=3000, value=450
@@ -283,12 +295,11 @@ with aba_scanner:
             if "ERRO_IMAGEM_INVALIDA" in resultado_ia:
               st.error(
                   "🚨 **Alerta:** A imagem não parece ser uma refeição válida."
-                  " Envie uma foto de comida."
+                  " Tire uma foto clara de comida."
               )
             else:
               horario_atual = datetime.now().strftime("%H:%M")
 
-              # Adiciona ao session_state do histórico diário
               st.session_state.historico_refeicoes.append({
                   "horario": horario_atual,
                   "descricao": "Refeição Escaneada",
@@ -301,7 +312,7 @@ with aba_scanner:
               )
               st.markdown("### 📋 Parecer do Nutri AI")
               st.markdown(resultado_ia)
-              st.rerun()  # Atualiza a tela para refletir a somatória na hora
+              st.rerun()
           except Exception as e:
             st.error(f"Erro ao processar com IA: {e}")
 
@@ -341,6 +352,7 @@ with aba_exercicios:
       ],
   )
 
+
   def exibir_foto_exercicio(nome_arquivo, caption_texto):
     caminho = os.path.join("assets", nome_arquivo)
     if os.path.exists(caminho):
@@ -349,6 +361,7 @@ with aba_exercicios:
       st.warning(
           f"⚠️ Imagem '{nome_arquivo}' não encontrada na pasta 'assets'."
       )
+
 
   if "Peitoral" in grupo_muscular:
     ex_peito = st.selectbox(
