@@ -56,12 +56,6 @@ if not api_key:
   except Exception:
     pass
 
-if not api_key:
-  st.warning(
-      "⚠️ ATENÇÃO: A chave da OpenAI (OPENAI_API_KEY) não foi encontrada no"
-      " sistema. Configure-a no terminal ou nos Secrets do Streamlit Cloud."
-  )
-
 client = OpenAI(api_key=api_key) if api_key else None
 
 # Título Principal do App
@@ -81,7 +75,7 @@ aba_metas, aba_scanner, aba_exercicios = st.tabs(
     [
         "📊 Definir Metas & Dieta",
         "📸 Scannear Prato (IA)",
-        "🏋️‍♂️ Guia de Exercícios & Subgrupos",
+        "🏋️‍♂️ Guia de Exercícios & Anatomia 3D",
     ]
 )
 
@@ -123,55 +117,22 @@ with aba_metas:
         ],
     )
 
-  # Bloco Explicativo Dinâmico por Objetivo
   if "Recomposição" in objetivo:
     st.info(
-        "💡 **Sobre este método:** Ideal para quem quer ganhar massa muscular"
-        " e queimar gordura ao mesmo tempo. O sistema ajusta suas calorias para"
-        " manter o peso estável, transformando gordura em músculos com alta"
-        " ingestão proteica."
+        "💡 **Sobre este método:** Ideal para ganhar massa muscular e queimar"
+        " gordura ao mesmo tempo, mantendo as calorias equilibradas e alta"
+        " proteína."
     )
   elif "Cutting" in objetivo:
     st.info(
         "💡 **Sobre este método:** Focado em secar e perder peso rápido, com"
-        " déficit calórico estratégico e alto consumo de proteínas para garantir"
-        " que você oxide apenas gordura e **não perca massa magra**."
+        " déficit calórico estratégico e alto consumo de proteínas para"
+        " preservar a massa magra."
     )
   else:
     st.info(
         "💡 **Sobre este método:** Perfeito para emagrecimento geral e"
-        " redução de medidas de forma saudável, controlando as calorias"
-        " diárias sem restrições extremas."
-    )
-
-  # Foco Principal do Treino (Ilustrativo / Seleção)
-  st.markdown("### 🏋️‍♂️ Foco Principal do Treino")
-  foco_treino = st.radio(
-      "Selecione sua principal ênfase muscular atual:",
-      [
-          "Superiores (Peito, Costas, Bíceps, Tríceps e Deltoides) 🦾",
-          "Inferiores (Quadríceps, Posteriores e Panturrilhas) 🦿",
-          "Corpo Inteiro (Full Body) ⚡",
-      ],
-      horizontal=True,
-  )
-
-  if "Superiores" in foco_treino:
-    st.info(
-        "💪 **Dica de Performance para Superiores:** O foco está em otimizar a"
-        " síntese proteica para peitoral, dorsal e braços, aplicando"
-        " rigorosamente a progressão de carga (*progressive overload*)."
-    )
-  elif "Inferiores" in foco_treino:
-    st.info(
-        "🔥 **Dica de Performance para Inferiores:** Membros inferiores"
-        " demandam grande gasto energético e estoques plenos de glicogênio."
-        " Garanta o consumo adequado de carboidratos antes do treino pesado."
-    )
-  else:
-    st.info(
-        "⚡ **Dica de Performance Full Body:** Abordagem equilibrada para gasto"
-        " calórico elevado e estímulo sistêmico."
+        " redução de medidas de forma saudável."
     )
 
   if st.button("🔥 Calcular Minha Meta Fit"):
@@ -233,13 +194,8 @@ with aba_scanner:
             " ambiente."
         )
       else:
-        with st.spinner(
-            "Analisando imagem e estimando macros com inteligência artificial..."
-        ):
+        with st.spinner("Analisando imagem com inteligência artificial..."):
           try:
-            caminho_temp = "temp_prato.jpg"
-            imagem.save(caminho_temp)
-
             resposta = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -248,237 +204,275 @@ with aba_scanner:
                         "content": (
                             "Você é um nutricionista esportivo rigoroso e um"
                             " sistema de visão computacional de segurança."
-                            " Primeiro, verifique se a imagem contém"
-                            " estritamente comida ou refeição. Se a imagem for"
-                            " um objeto inválido (ex: tijolo, parede, animal,"
-                            " selfie, objeto aleatório), retorne exatamente:"
-                            " 'ERRO_IMAGEM_INVALIDA'. Se for comida, analise e"
-                            " estime as calorias, proteínas, carboidratos e"
-                            " gorduras de forma detalhada em Markdown."
+                            " Verifique se a imagem contém comida. Se for"
+                            " objeto inválido (tijolo, animal, selfie),"
+                            " retorne 'ERRO_IMAGEM_INVALIDA'. Se for comida,"
+                            " estime calorias e macros em Markdown."
                         ),
                     },
-                    {
-                        "role": "user",
-                        "content": "Analise esta refeição para o meu plano.",
-                    },
+                    {"role": "user", "content": "Analise esta refeição."},
                 ],
             )
             resultado_ia = resposta.choices[0].message.content
 
             if "ERRO_IMAGEM_INVALIDA" in resultado_ia:
               st.error(
-                  "🚨 **Alerta de Segurança (Anti-Tijolo):** A imagem enviada"
-                  " não parece ser uma refeição válida. Por favor, envie uma"
-                  " foto clara do seu prato de comida."
+                  "🚨 **Alerta:** A imagem não parece ser uma refeição válida."
+                  " Envie uma foto clara do prato."
               )
             else:
-              st.markdown("### 📋 Relatório Nutricional da Refeição")
+              st.markdown("### 📋 Relatório Nutricional")
               st.markdown(resultado_ia)
-
           except Exception as e:
-            st.error(f"Ocorreu um erro ao processar a imagem: {e}")
+            st.error(f"Erro ao processar imagem: {e}")
 
 # ==========================================
-# ABA 3: GUIA DE EXERCÍCIOS & ANATOMIA 3D
+# ABA 3: GUIA DE EXERCÍCIOS & ANATOMIA 3D (LOCAL)
 # ==========================================
 with aba_exercicios:
-  st.markdown("### 🏋️‍♂️ Guia Técnico & Bonequinhos Anatômicos 3D")
+  st.markdown("### 🏋️‍♂️ Guia Técnico Visual com Bonequinhos 3D")
   st.write(
-      "Selecione o agrupamento e o exercício específico para visualizar a"
-      " ilustração anatômica e as diretrizes de execução."
+      "Selecione o grupo e o exercício para ver a ilustração anatômica exata"
+      " e o passo a passo para iniciantes."
   )
 
-  # Categoria Principal
-  categoria_treino = st.selectbox(
-      "Selecione a Categoria:",
+  grupo_muscular = st.selectbox(
+      "Selecione o Grupo Muscular:",
       [
-          "Membros Superiores (Peito, Costas, Braços e Ombros) 🦾",
-          "Membros Inferiores (Pernas e Panturrilhas) 🦿",
-          "Corpo Inteiro (Full Body) ⚡",
+          "Peitoral (Supinos e Crucifixos) 🦾",
+          "Costas / Dorsal (Puxadas e Remadas) 🦾",
+          "Braços (Bíceps e Tríceps) 🦾",
+          "Ombros (Deltoides) 🦾",
+          "Membros Inferiores (Pernas) 🦿",
       ],
   )
 
-  if "Superiores" in categoria_treino:
-    sub_sup = st.selectbox(
-        "Subgrupo de Superiores:",
+  if "Peitoral" in grupo_muscular:
+    ex_peito = st.selectbox(
+        "Exercício:",
         [
-            "Peitoral",
-            "Costas / Dorsal",
-            "Bíceps",
-            "Tríceps",
-            "Deltoides / Ombros",
+            "Supino Reto com Barra",
+            "Supino Inclinado com Halteres",
+            "Crucifixo na Polia",
         ],
     )
 
-    if sub_sup == "Peitoral":
-      ex_peito = st.selectbox(
-          "Exercício:",
-          [
-              "Supino Reto com Barra",
-              "Supino Inclinado com Halteres",
-              "Crucifixo na Polia",
-          ],
-      )
-      if "Supino Reto" in ex_peito:
-        st.markdown("#### 💥 Supino Reto com Barra")
+    if "Supino Reto" in ex_peito:
+      st.markdown("#### 💥 Supino Reto com Barra")
+      if os.path.exists("assets/supino_reto.jpg"):
         st.image(
             "assets/supino_reto.jpg",
-            caption="Anatomia 3D - Feixes do Peitoral e Tríceps",
+            caption="Anatomia 3D - Foco no Peitoral e Tríceps",
             use_column_width=True,
-        )
-        st.info(
-            "🎯 **Foco Anatômico:** Grande peitoral (fio esternal) e deltóide"
-            " anterior.\n\n- **Como Executar:** Escápulas retraídas, pés firmes"
-            " no solo. Desça controlando até o peito e empurre para cima.\n-"
-            " **Progressão de Carga:** Aumente o peso ao dominar 3x10 com"
-            " perfeição."
-        )
-      elif "Inclinado" in ex_peito:
-        st.markdown("#### 💥 Supino Inclinado com Halteres")
-        st.image(
-            "assets/supino_inclinado.jpg",
-            caption="Anatomia 3D - Porção Superior do Peitoral",
-            use_column_width=True,
-        )
-        st.info(
-            "🎯 **Foco Anatômico:** Feixe clavicular (peitoral superior).\n\n-"
-            " **Como Executar:** Banco a 30°-45°. Desça controlando o alongamento"
-            " da parte alta e contraia no topo."
         )
       else:
-        st.markdown("#### 💥 Crucifixo na Polia")
+        st.warning(
+            "⚠️ Imagem 'supino_reto.jpg' não encontrada na pasta 'assets'."
+        )
+      st.info(
+          "🎯 **Como fazer (Iniciante):** Deite no banco, mantenha os pés firmes"
+          " no chão e as escápulas coladas para trás. Segure a barra na largura"
+          " dos ombros, desça controlando até tocar levemente a linha do peito"
+          " e empurre para cima.\n\n- **Dica de Ouro:** Não estique totalmente"
+          " os cotovelos no topo para manter a tensão constante no peitoral."
+      )
+
+    elif "Inclinado" in ex_peito:
+      st.markdown("#### 💥 Supino Inclinado com Halteres")
+      if os.path.exists("assets/supino_inclinado.jpg"):
+        st.image(
+            "assets/supino_inclinado.jpg",
+            caption="Anatomia 3D - Foco no Peitoral Superior",
+            use_column_width=True,
+        )
+      else:
+        st.warning(
+            "⚠️ Imagem 'supino_inclinado.jpg' não encontrada na pasta 'assets'."
+        )
+      st.info(
+          "🎯 **Como fazer (Iniciante):** Ajuste o banco em um ângulo de 30 a"
+          " 45 graus. Segure os halteres ao lado do peito superior e empurre"
+          " para cima controlando o movimento."
+      )
+
+    else:
+      st.markdown("#### 💥 Crucifixo na Polia")
+      if os.path.exists("assets/Crucifixo_na_Polia.jpg"):
+        st.image(
+            "assets/Crucifixo_na_Polia.jpg",
+            caption="Anatomia 3D - Isolamento do Peitoral",
+            use_column_width=True,
+        )
+      elif os.path.exists("assets/crucifixo.jpg"):
         st.image(
             "assets/crucifixo.jpg",
             caption="Anatomia 3D - Isolamento do Peitoral",
             use_column_width=True,
         )
-        st.info(
-            "🎯 **Foco Anatômico:** Isolamento total do peitoral com tensão"
-            " contínua.\n\n- **Como Executar:** Tronco levemente inclinado,"
-            " cotovelos semi-flexionados, abraçando o movimento."
-        )
-
-    elif sub_sup == "Costas / Dorsal":
-      ex_costas = st.selectbox(
-          "Exercício:", ["Puxada Alta na Polia", "Remada Curvada com Barra"]
+      else:
+        st.warning("⚠️ Imagem do crucifixo não encontrada na pasta 'assets'.")
+      st.info(
+          "🎯 **Como fazer (Iniciante):** Fique no meio dos cabos, com os"
+          " braços levemente flexionados (como se estivesse abraçando uma"
+          " árvore) e feche as mãos na altura do peito."
       )
-      if "Puxada" in ex_costas:
-        st.markdown("#### 💥 Puxada Alta na Polia")
+
+  elif "Costas" in grupo_muscular:
+    ex_costas = st.selectbox(
+        "Exercício:", ["Puxada Alta na Polia", "Remada Curvada com Barra"]
+    )
+    if "Puxada" in ex_costas:
+      st.markdown("#### 💥 Puxada Alta na Polia")
+      if os.path.exists("assets/puxada_alta.jpg"):
         st.image(
             "assets/puxada_alta.jpg",
-            caption="Anatomia 3D - Grande Dorsal",
+            caption="Anatomia 3D - Foco no Grande Dorsal",
             use_column_width=True,
-        )
-        st.info(
-            "🎯 **Foco Anatômico:** Grande dorsal e redondo maior.\n\n- **Como"
-            " Executar:** Puxe a barra em direção ao peito, focando em puxar"
-            " com os cotovelos para baixo."
         )
       else:
-        st.markdown("#### 💥 Remada Curvada com Barra")
+        st.warning(
+            "⚠️ Imagem 'puxada_alta.jpg' não encontrada na pasta 'assets'."
+        )
+      st.info(
+          "🎯 **Como fazer (Iniciante):** Sente na máquina com os joelhos"
+          " travados. Puxe a barra em direção ao peito estufando o tronco e"
+          " puxando com os cotovelos para baixo."
+      )
+    else:
+      st.markdown("#### 💥 Remada Curvada com Barra")
+      if os.path.exists("assets/remada_curvada.jpg"):
         st.image(
             "assets/remada_curvada.jpg",
-            caption="Anatomia 3D - Espessura de Dorsal",
+            caption="Anatomia 3D - Foco na Espessura das Costas",
             use_column_width=True,
         )
-        st.info(
-            "🎯 **Foco Anatômico:** Rombóides, trapézio e dorsais.\n\n- **Como"
-            " Executar:** Tronco inclinado a 45°, coluna neutra, puxe a barra no"
-            " umbigo."
+      else:
+        st.warning(
+            "⚠️ Imagem 'remada_curvada.jpg' não encontrada na pasta 'assets'."
         )
+      st.info(
+          "🎯 **Como fazer (Iniciante):** Incline o tronco a 45 graus com a"
+          " coluna reta e puxe a barra na direção do umbigo."
+      )
 
-    elif sub_sup == "Bíceps":
-      st.selectbox("Exercício:", ["Rosca Direta com Barra W"])
+  elif "Braços" in grupo_muscular:
+    ex_braco = st.selectbox(
+        "Exercício:", ["Rosca Direta com Barra W", "Tríceps na Polia (Corda)"]
+    )
+    if "Rosca" in ex_braco:
       st.markdown("#### 💥 Rosca Direta com Barra W")
-      st.image(
-          "assets/rosca_direta.jpg",
-          caption="Anatomia 3D - Bíceps Braquial",
-          use_column_width=True,
-      )
+      if os.path.exists("assets/rosca_direta.jpg"):
+        st.image(
+            "assets/rosca_direta.jpg",
+            caption="Anatomia 3D - Foco no Bíceps",
+            use_column_width=True,
+        )
+      else:
+        st.warning(
+            "⚠️ Imagem 'rosca_direta.jpg' não encontrada na pasta 'assets'."
+        )
       st.info(
-          "🎯 **Foco Anatômico:** Bíceps braquial e braquiorradial.\n\n- **Como"
-          " Executar:** Cotovelos fixos ao lado do tronco, sem balançar o corpo"
-          " na subida."
+          "🎯 **Como fazer (Iniciante):** Fique em pé com os cotovelos colados"
+          " nas costelas. Suba a barra controlando o peso e desça devagar."
       )
-
-    elif sub_sup == "Tríceps":
-      st.selectbox("Exercício:", ["Tríceps na Polia com Corda"])
-      st.markdown("#### 💥 Tríceps na Polia com Corda")
-      st.image(
-          "assets/triceps_polia.jpg",
-          caption="Anatomia 3D - Tríceps Braquial",
-          use_column_width=True,
-      )
-      st.info(
-          "🎯 **Foco Anatômico:** Cabeças lateral, medial e longa do"
-          " tríceps.\n\n- **Como Executar:** Cotovelos colados nas costelas,"
-          " estenda os braços abrindo a corda no final."
-      )
-
     else:
-      st.selectbox("Exercício:", ["Desenvolvimento com Halteres"])
-      st.markdown("#### 💥 Desenvolvimento com Halteres")
+      st.markdown("#### 💥 Tríceps na Polia (Corda)")
+      if os.path.exists("assets/triceps_polia.jpg"):
+        st.image(
+            "assets/triceps_polia.jpg",
+            caption="Anatomia 3D - Foco no Tríceps",
+            use_column_width=True,
+        )
+      else:
+        st.warning(
+            "⚠️ Imagem 'triceps_polia.jpg' não encontrada na pasta 'assets'."
+        )
+      st.info(
+          "🎯 **Como fazer (Iniciante):** Segure a corda com os cotovelos fixos"
+          " ao lado do corpo e empurre para baixo, abrindo as pontas da corda"
+          " no final."
+      )
+
+  elif "Ombros" in grupo_muscular:
+    st.selectbox("Exercício:", ["Desenvolvimento com Halteres"])
+    st.markdown("#### 💥 Desenvolvimento com Halteres")
+    if os.path.exists("assets/desenvolvimento.jpg"):
       st.image(
           "assets/desenvolvimento.jpg",
-          caption="Anatomia 3D - Deltóides e Ombros",
+          caption="Anatomia 3D - Foco nos Deltóides",
           use_column_width=True,
-      )
-      st.info(
-          "🎯 **Foco Anatômico:** Deltóide anterior e lateral.\n\n- **Como"
-          " Executar:** Sentado com apoio lombar, empurre os halteres para cima"
-          " sem hiperextender a lombar."
-      )
-
-  elif "Inferiores" in categoria_treino:
-    sub_inf = st.selectbox(
-        "Subgrupo de Inferiores:",
-        ["Quadríceps", "Posteriores de Coxa", "Panturrilhas"],
-    )
-
-    if sub_inf == "Quadríceps":
-      st.selectbox("Exercício:", ["Agachamento Livre", "Leg Press 45°"])
-      st.markdown("#### 💥 Agachamento Livre")
-      st.image(
-          "assets/agachamento.jpg",
-          caption="Anatomia 3D - Quadríceps e Glúteos",
-          use_column_width=True,
-      )
-      st.info(
-          "🎯 **Foco Anatômico:** Quadríceps completo e glúteos.\n\n- **Como"
-          " Executar:** Barra nos trapézios, desça o quadril mantendo o tronco"
-          " erguido e calcanhares firmes."
-      )
-    elif sub_inf == "Posteriores de Coxa":
-      st.selectbox("Exercício:", ["Stiff com Barra"])
-      st.markdown("#### 💥 Stiff com Barra")
-      st.image(
-          "assets/stiff.jpg",
-          caption="Anatomia 3D - Posteriores e Glúteos",
-          use_column_width=True,
-      )
-      st.info(
-          "🎯 **Foco Anatômico:** Bíceps femoral e semitendíneo.\n\n- **Como"
-          " Executar:** Dobradiça de quadril, jogando o quadril para trás com"
-          " joelhos levemente flexionados."
-      )
+        )
     else:
-      st.selectbox("Exercício:", ["Panturrilha em Pé na Máquina"])
-      st.markdown("#### 💥 Panturrilha em Pé na Máquina")
-      st.image(
-          "assets/panturrilha.jpg",
-          caption="Anatomia 3D - Gastrocnêmio e Sóleo",
-          use_column_width=True,
+      st.warning(
+          "⚠️ Imagem 'desenvolvimento.jpg' não encontrada na pasta 'assets'."
       )
-      st.info(
-          "🎯 **Foco Anatômico:** Complexo panturrilha.\n\n- **Como Executar:**"
-          " Amplitude total, alongando embaixo e segurando 1 segundo no pico da"
-          " contração em cima."
-      )
+    st.info(
+        "🎯 **Como fazer (Iniciante):** Sentado no banco com apoio, segure os"
+        " halteres na altura dos ombros e empurre para cima acima da cabeça."
+    )
 
   else:
-    st.markdown("#### ⚡ Treino Full Body (Corpo Inteiro)")
-    st.info(
-        "💡 **Abordagem Sistemática:** Ideal para estímulo global e gasto"
-        " calórico elevado. Alterne exercícios compostos de membros superiores"
-        " e inferiores mantendo alta intensidade."
+    ex_perna = st.selectbox(
+        "Exercício:",
+        [
+            "Agachamento Livre",
+            "Stiff com Barra",
+            "Panturrilha em Pé na Máquina",
+        ],
     )
+    if "Agachamento" in ex_perna:
+      st.markdown("#### 💥 Agachamento Livre")
+      if os.path.exists("assets/agachamento.jpg"):
+        st.image(
+            "assets/agachamento.jpg",
+            caption="Anatomia 3D - Foco em Quadríceps e Glúteos",
+            use_column_width=True,
+        )
+      else:
+        st.warning(
+            "⚠️ Imagem 'agachamento.jpg' não encontrada na pasta 'assets'."
+        )
+      st.info(
+          "🎯 **Como fazer (Iniciante):** Posicione a barra nos trapézios,"
+          " desça o quadril jogando o bumbum para trás como se fosse sentar"
+          " em uma cadeira, mantendo o calcanhar no chão."
+      )
+    elif "Stiff" in ex_perna:
+      st.markdown("#### 💥 Stiff com Barra")
+      if os.path.exists("assets/stiff.jpg"):
+        st.image(
+            "assets/stiff.jpg",
+            caption="Anatomia 3D - Foco em Posteriores de Coxa",
+            use_column_width=True,
+        )
+      else:
+        st.warning("⚠️ Imagem 'stiff.jpg' não encontrada na pasta 'assets'.")
+      st.info(
+          "🎯 **Como fazer (Iniciante):** Pernas estendidas com leve flexão nos"
+          " joelhos, desça a barra rente às pernas sentindo alongar a parte de"
+          " trás da coxa."
+      )
+    else:
+      st.markdown("#### 💥 Panturrilha em Pé na Máquina")
+      if os.path.exists("assets/panturrilha.jpg"):
+        st.image(
+            "assets/panturrilha.jpg",
+            caption="Anatomia 3D - Foco em Panturrilhas",
+            use_column_width=True,
+        )
+      else:
+        st.warning(
+            "⚠️ Imagem 'panturrilha.jpg' não encontrada na pasta 'assets'."
+        )
+      st.info(
+          "🎯 **Como fazer (Iniciante):** Apoie os ombros na máquina, deixe o"
+          " calcanhar baixar para alongar bem embaixo e suba na ponta dos pés"
+          " com força."
+      )
+
+st.markdown("---")
+st.markdown(
+    "<p style='text-align: center; color: #707070; font-size: 0.8rem;'>Nutri"
+    " Fit AI © 2026 - Alta Performance & Inteligência Artificial</p>",
+    unsafe_allow_html=True,
+)
