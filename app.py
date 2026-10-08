@@ -1,116 +1,118 @@
-import base64
-import json
-from io import BytesIO
-import os  # <--- Biblioteca que o Python usa para ler as chaves do sistema
-from openai import OpenAI  # <--- Biblioteca oficial da OpenAI
-from PIL import Image
+import os
 import streamlit as st
+from PIL import Image
+from openai import OpenAI
 
-# --- CONFIGURAÇÃO VISUAL ---
+# Configuração da página do Streamlit
 st.set_page_config(
-    page_title="Nutri Fit AI | Performance & Dieta",
+    page_title="Nutri Fit AI - Seu Personal & Nutri na Nuvem",
     page_icon="🏋️‍♂️",
     layout="centered",
 )
 
-# --- CSS PERSONALIZADO (FUNDO DE ACADEMIA) ---
-url_fundo_academia = "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1920&auto=format&fit=crop"
-
+# --- ESTILIZAÇÃO CSS (TEMA HARDCORE / ACADEMIA) ---
 st.markdown(
-    f"""
+    """
     <style>
-    .stApp {{
-        background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), 
-                    url("{url_fundo_academia}");
+    .stApp {
+        background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.85)), 
+                    url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1920&auto=format&fit=crop");
         background-size: cover;
         background-position: center;
-        background-attachment: fixed;
-    }}
-    h1, h2, h3 {{
-        color: #39FF14 !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-    }}
-    div.stTabs [data-baseweb="tab-panel"] {{
-        background-color: rgba(20, 20, 20, 0.85);
-        padding: 25px;
-        border-radius: 12px;
-        border: 1px solid #333;
-        box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.7);
-    }}
-    .stButton>button {{
-        background-color: #39FF14 !important;
-        color: #000000 !important;
+        color: #ffffff;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        color: #00FF66 !important;
+        font-family: 'Helvetica Neue', sans-serif;
+    }
+    .stButton>button {
+        background-color: #00FF66;
+        color: #000000;
         font-weight: bold;
         border-radius: 8px;
         border: none;
-        box-shadow: 0px 0px 10px rgba(57, 255, 20, 0.4);
-    }}
+        padding: 0.6rem 1.2rem;
+        width: 100%;
+    }
+    .stButton>button:hover {
+        background-color: #00cc52;
+        color: #ffffff;
+    }
+    .stInfo {
+        background-color: rgba(20, 20, 20, 0.85);
+        color: #ffffff;
+        border-left: 5px solid #00FF66;
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-# --- CONFIGURAÇÃO DA CHAVE DA OPENAI ---
-# O Python vai ler a chave automaticamente da variável de ambiente chamada OPENAI_API_KEY
-# Se a chave não estiver configurada, ele avisa na tela para você configurar.
-try:
-  api_key = os.environ.get("OPENAI_API_KEY")
-  if not api_key:
-    st.error(
-        "⚠️ ATENÇÃO: A chave da OpenAI (OPENAI_API_KEY) não foi encontrada no"
-        " sistema. Configure a chave no seu terminal antes de rodar."
-    )
-    client = None
-  else:
-    # Cria o cliente oficial da OpenAI usando a sua chave de backend
-    client = OpenAI(api_key=api_key)
-except Exception as e:
-  st.error(f"Erro ao inicializar o cliente OpenAI: {e}")
-  client = None
+# Inicialização do Cliente OpenAI (Lendo da nuvem ou do ambiente local)
+api_key = os.environ.get("OPENAI_API_KEY")
+if not api_key:
+  try:
+    api_key = st.secrets.get("OPENAI_API_KEY")
+  except Exception:
+    pass
 
+if not api_key:
+  st.warning(
+      "⚠️ ATENÇÃO: A chave da OpenAI (OPENAI_API_KEY) não foi encontrada no"
+      " sistema. Configure-a no terminal ou nos Secrets do Streamlit Cloud."
+  )
 
-# Função para converter imagem para base64
-def imagem_para_base64(imagem):
-  buffered = BytesIO()
-  imagem.save(buffered, format="JPEG")
-  return base64.b64encode(buffered.getvalue()).decode("utf-8")
+client = OpenAI(api_key=api_key) if api_key else None
 
-
-# --- LAYOUT PRINCIPAL ---
+# Título Principal do App
 st.markdown(
-    "<h1 style='text-align: center;'>🏋️‍♂️ Nutri Fit AI</h1>",
+    "<h1 style='text-align: center;'>⚡ Nutri Fit AI</h1>",
     unsafe_allow_html=True,
 )
 st.markdown(
-    "<h3 style='text-align: center; color: #FAFAFA !important;'>O seu personal"
-    " nutricionista com IA na nuvem.</h3>",
+    "<h4 style='text-align: center; color: #a0a0a0;'>O seu personal"
+    " nutricionista com IA na nuvem.</h4>",
     unsafe_allow_html=True,
 )
+st.markdown("---")
 
-# Abas na tela
-aba1, aba2 = st.tabs(["📊 Definir Metas", "📸 Scannear Prato"])
+# Abas de Navegação do Aplicativo
+aba_metas, aba_scanner, aba_exercicios = st.tabs(
+    [
+        "📊 Definir Metas & Dieta",
+        "📸 Scannear Prato (IA)",
+        "🏋️‍♂️ Guia de Exercícios & Subgrupos",
+    ]
+)
 
-with aba1:
-  st.header("📊 Defina suas Metas e Perfil")
-  st.write("Preencha seus dados para calcularmos seu TDEE e macros ideais.")
+# ==========================================
+# ABA 1: METAS & DIETA
+# ==========================================
+with aba_metas:
+  st.markdown("### 🎛️ Defina suas Metas e Perfil")
+  st.write(
+      "Preencha seus dados para calcularmos seu TDEE, macros ideias e o foco"
+      " estratégico."
+  )
 
   col1, col2 = st.columns(2)
   with col1:
-    peso = st.number_input("Peso (kg)", value=80.0, step=0.5)
-    altura = st.number_input("Altura (cm)", value=175.0, step=1.0)
-    idade = st.number_input("Idade", value=41, step=1)
+    peso = st.number_input("Peso (kg)", min_value=30.0, max_value=200.0, value=80.0)
+    altura = st.number_input(
+        "Altura (cm)", min_value=100.0, max_value=230.0, value=175.0
+    )
+    idade = st.number_input("Idade", min_value=10, max_value=100, value=41)
 
   with col2:
     genero = st.selectbox("Gênero", ["Masculino", "Feminino"])
     nivel_atividade = st.selectbox(
         "Nível de Atividade Física",
         [
-            "Sedentário (pouco ou nenhum exercício) 🛋️",
-            "Levemente ativo (exercício leve 1-3 dias/sem) 🚶",
-            "Moderadamente ativo (exercício moderado 3-5 dias/sem) 🏃‍♂️",
-            "Muito ativo (exercício pesado 6-7 dias/sem) 🏋️‍♀️",
+            "Sedentário (pouco ou nenhum exercício)",
+            "Levemente ativo (exercício leve 1-3 dias/sem)",
+            "Moderadamente ativo (exercício moderado 3-5 dias/sem)",
+            "Altamente ativo (exercício pesado 6-7 dias/sem)",
         ],
-        index=2,
     )
     objetivo = st.selectbox(
         "Seu Objetivo",
@@ -121,41 +123,99 @@ with aba1:
         ],
     )
 
-  if st.button("🚀 Calcular Minha Meta Fit"):
+  # Bloco Explicativo Dinâmico por Objetivo
+  if "Recomposição" in objetivo:
+    st.info(
+        "💡 **Sobre este método:** Ideal para quem quer ganhar massa muscular"
+        " e queimar gordura ao mesmo tempo. O sistema ajusta suas calorias para"
+        " manter o peso estável, transformando gordura em músculos com alta"
+        " ingestão proteica."
+    )
+  elif "Cutting" in objetivo:
+    st.info(
+        "💡 **Sobre este método:** Focado em secar e perder peso rápido, com"
+        " déficit calórico estratégico e alto consumo de proteínas para garantir"
+        " que você oxide apenas gordura e **não perca massa magra**."
+    )
+  else:
+    st.info(
+        "💡 **Sobre este método:** Perfeito para emagrecimento geral e"
+        " redução de medidas de forma saudável, controlando as calorias"
+        " diárias sem restrições extremas."
+    )
+
+  # Foco Principal do Treino (Ilustrativo / Seleção)
+  st.markdown("### 🏋️‍♂️ Foco Principal do Treino")
+  foco_treino = st.radio(
+      "Selecione sua principal ênfase muscular atual:",
+      [
+          "Superiores (Peito, Costas, Bíceps, Tríceps e Deltoides) 🦾",
+          "Inferiores (Quadríceps, Posteriores e Panturrilhas) 🦿",
+          "Corpo Inteiro (Full Body) ⚡",
+      ],
+      horizontal=True,
+  )
+
+  if "Superiores" in foco_treino:
+    st.info(
+        "💪 **Dica de Performance para Superiores:** O foco está em otimizar a"
+        " síntese proteica para peitoral, dorsal e braços, aplicando"
+        " rigorosamente a progressão de carga (*progressive overload*)."
+    )
+  elif "Inferiores" in foco_treino:
+    st.info(
+        "🔥 **Dica de Performance para Inferiores:** Membros inferiores"
+        " demandam grande gasto energético e estoques plenos de glicogênio."
+        " Garanta o consumo adequado de carboidratos antes do treino pesado."
+    )
+  else:
+    st.info(
+        "⚡ **Dica de Performance Full Body:** Abordagem equilibrada para gasto"
+        " calórico elevado e estímulo sistêmico."
+    )
+
+  if st.button("🔥 Calcular Minha Meta Fit"):
+    # Cálculo básico de TDEE (Mifflin-St Jeor)
     if genero == "Masculino":
-      tmb = (10 * peso) + (6.25 * altura) - (5 * idade) + 5
+      tmb = 10 * peso + 6.25 * altura - 5 * idade + 5
     else:
-      tmb = (10 * peso) + (6.25 * altura) - (5 * idade) - 161
+      tmb = 10 * peso + 6.25 * altura - 5 * idade - 161
 
-    fatores = {
-        "Sedentário (pouco ou nenhum exercício) 🛋️": 1.2,
-        "Levemente ativo (exercício leve 1-3 dias/sem) 🚶": 1.375,
-        "Moderadamente ativo (exercício moderado 3-5 dias/sem) 🏃‍♂️": 1.55,
-        "Muito ativo (exercício pesado 6-7 dias/sem) 🏋️‍♀️": 1.725,
-    }
-    tdee = tmb * fatores[nivel_atividade]
-
-    if objetivo == "Ganhar massa e perder gordura (Recomposição) 🚀":
-      calorias_meta = tdee
-      proteina_por_kg = 2.4
-    elif objetivo == "Perder peso e preservar a massa (Cutting) 🔥":
-      calorias_meta = tdee - 400
-      proteina_por_kg = 2.4
+    # Fator de atividade
+    if "Sedentário" in nivel_atividade:
+      tdee = tmb * 1.2
+    elif "Levemente" in nivel_atividade:
+      tdee = tmb * 1.375
+    elif "Moderadamente" in nivel_atividade:
+      tdee = tmb * 1.55
     else:
-      calorias_meta = tdee - 500
-      proteina_por_kg = 2.0
+      tdee = tmb * 1.725
 
-    meta_proteina = peso * proteina_por_kg
+    # Ajuste por objetivo
+    if "Recomposição" in objetivo:
+      calorias_alvo = int(tdee)
+    elif "Cutting" in objetivo:
+      calorias_alvo = int(tdee - 400)
+    else:
+      calorias_alvo = int(tdee - 500)
 
-    st.success("✅ Metas Calculadas com Sucesso!")
-    m1, m2, m3 = st.columns(3)
-    m1.metric("🔥 Gasto Basal (TMB)", f"{int(tmb)} kcal")
-    m2.metric("🎯 Meta Diária", f"{int(calorias_meta)} kcal")
-    m3.metric("🍗 Meta de Proteína", f"{int(meta_proteina)}g")
+    proteina_alvo = int(peso * 2.2)  # Base segura em gramas
 
-with aba2:
-  st.header("📸 Scannear Prato com IA")
-  st.write("Tire uma foto ou suba a imagem do seu rango para análise rápida.")
+    st.success("🎯 Metas Calculadas com Sucesso!")
+    col_m1, col_m2, col_m3 = st.columns(3)
+    col_m1.metric("Gasto Diário (TDEE)", f"{int(tdee)} kcal")
+    col_m2.metric("Calorias Alvo", f"{calorias_alvo} kcal")
+    col_m3.metric("Proteína Recomendada", f"{proteina_alvo} g/dia")
+
+# ==========================================
+# ABA 2: SCANNER DE PRATOS (IA COM VISÃO)
+# ==========================================
+with aba_scanner:
+  st.markdown("### 📸 Scanner Inteligente de Refeições")
+  st.write(
+      "Envie a foto do seu prato para a IA analisar os macronutrientes em"
+      " segundos."
+  )
 
   arquivo_foto = st.file_uploader(
       "Escolha a foto do prato...", type=["jpg", "jpeg", "png"]
@@ -167,80 +227,165 @@ with aba2:
         imagem,
         caption="Prato enviado para análise",
         use_column_width=True,
-        output_format="JPEG",
     )
 
-    if st.button("🔍 Analisar Refeição"):
+    if st.button("🔍 Analisar Prato com IA"):
       if not client:
         st.error(
-            "❌ O cliente da OpenAI não está configurado. Verifique a chave da"
-            " API."
+            "Erro: Chave da OpenAI não configurada. Verifique os Secrets ou o"
+            " ambiente."
         )
       else:
         with st.spinner(
-            "🧠 Processando imagem na API oficial da OpenAI (GPT-4o-mini)..."
+            "Analisando imagem e estimando macros com inteligência artificial..."
         ):
           try:
-            base64_img = imagem_para_base64(imagem)
+            # Salvando imagem temporariamente para envio à API
+            caminho_temp = "temp_prato.jpg"
+            imagem.save(caminho_temp)
 
-            prompt_sistema = (
-                "Você é um nutricionista especialista em performance"
-                " esportiva. Analise a imagem deste prato de comida."
-                " Identifique os alimentos visíveis, estime o peso aproximado"
-                " de cada item e retorne estritamente um JSON com o seguinte"
-                ' formato (sem markdown ou crases, apenas o JSON puro):'
-                ' {"alimentos": [{"nome": "...", "peso_g": ...}], '
-                '"total_calorias": ..., "total_proteinas_g": ...}'
-            )
-
-            # Chamada direta para o modelo inteligente da OpenAI na nuvem
+            # Bloco Anti-Tijolo / Blindagem Visual (Exemplo de validação rápida)
             resposta = client.chat.completions.create(
                 model="gpt-4o-mini",
-                messages=[{
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": prompt_sistema},
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_img}"
-                            },
-                        },
-                    ],
-                }],
-                max_tokens=600,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "Você é um nutricionista esportivo rigoroso e um"
+                            " sistema de visão computacional de segurança."
+                            " Primeiro, verifique se a imagem contém"
+                            " estritamente comida ou refeição. Se a imagem for"
+                            " um objeto inválido (ex: tijolo, parede, animal,"
+                            " selfie, objeto aleatório), retorne exatamente:"
+                            " 'ERRO_IMAGEM_INVALIDA'. Se for comida, analise e"
+                            " estime as calorias, proteínas, carboidratos e"
+                            " gorduras de forma detalhada em Markdown."
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": "Analise esta refeição para o meu plano.",
+                    },
+                ],
             )
+            resultado_ia = resposta.choices[0].message.content
 
-            texto_resposta = resposta.choices[0].message.content
-            texto_limpo = (
-                texto_resposta.replace("```json", "")
-                .replace("```", "")
-                .strip()
-            )
-
-            st.subheader("📋 Resultado da Análise:")
-            dados_json = json.loads(texto_limpo)
-
-            cal_ref = dados_json.get("total_calorias", 0)
-            prot_ref = dados_json.get("total_proteinas_g", 0)
-
-            r1, r2 = st.columns(2)
-            r1.metric("🍽️ Calorias Estimadas", f"{cal_ref} kcal")
-            r2.metric("💪 Proteínas Estimadas", f"{prot_ref}g")
-
-            st.write("**Itens Detectados:**")
-            for alimento in dados_json.get("alimentos", []):
-              st.markdown(f"- **{alimento['nome']}**: ~{alimento['peso_g']}g")
-
-            with st.expander("Ver JSON Bruto"):
-              st.json(dados_json)
+            if "ERRO_IMAGEM_INVALIDA" in resultado_ia:
+              st.error(
+                  "🚨 **Alerta de Segurança (Anti-Tijolo):** A imagem enviada"
+                  " não parece ser uma refeição válida. Por favor, envie uma"
+                  " foto clara do seu prato de comida."
+              )
+            else:
+              st.markdown("### 📋 Relatório Nutricional da Refeição")
+              st.markdown(resultado_ia)
 
           except Exception as e:
-            st.error(f"❌ Erro ao processar a imagem na API: {e}")
+            st.error(f"Ocorreu um erro ao processar a imagem: {e}")
+
+# ==========================================
+# ABA 3: GUIA DE EXERCÍCIOS & SUBGRUPOS
+# ==========================================
+with aba_exercicios:
+  st.markdown("### 🏋️‍♂️ Guia Técnico de Exercícios por Subgrupo")
+  st.write(
+      "Consulte os principais agrupamentos musculares, orientações de execução"
+      " e foco em hipertrofia."
+  )
+
+  subgrupo = st.selectbox(
+      "Selecione o Subgrupo Muscular:",
+      [
+          "Peitoral (Superiores) 🦾",
+          "Dorsal / Costas (Superiores) 🦾",
+          "Bíceps (Superiores) 🦾",
+          "Tríceps (Superiores) 🦾",
+          "Deltoides / Ombros (Superiores) 🦾",
+          "Quadríceps (Inferiores) 🦿",
+          "Posteriores de Coxa (Inferiores) 🦿",
+          "Panturrilhas (Inferiores) 🦿",
+      ],
+  )
+
+  if "Peitoral" in subgrupo:
+    st.markdown("#### 💥 Foco: Peitoral (Superiores)")
+    st.markdown(
+        "- **Principais Exercícios:** Supino Reto com Barra, Supino Inclinado com"
+        " Halteres, Crucifixo na Polia.\n- **Dica de Ouro:** Mantenha as"
+        " escápulas deprimidas e retraídas no banco. Para hipertrofia"
+        " máxima, priorize a amplitude completa na fase excêntrica"
+        " (alongamento).\n- **Progressão de Carga:** Aumente o peso apenas"
+        " quando dominar 3 séries de 8 a 10 repetições com execução perfeita."
+    )
+  elif "Dorsal" in subgrupo:
+    st.markdown("#### 💥 Foco: Costas / Dorsal (Superiores)")
+    st.markdown(
+        "- **Principais Exercícios:** Puxada Alta na Polia, Remada Curvada com"
+        " Barra, Remada Baixa.\n- **Dica de Ouro:** Puxe com os cotovelos em"
+        " direção ao quadril, focando em esmagar as dorsais e evitando puxar"
+        " apenas com a força dos braços.\n- **Progressão de Carga:** Mantenha"
+        " a coluna neutra e firme em todas as repetições."
+    )
+  elif "Bíceps" in subgrupo:
+    st.markdown("#### 💥 Foco: Bíceps (Superiores)")
+    st.markdown(
+        "- **Principais Exercícios:** Rosca Direta com Barra W, Rosca Alternada"
+        " com Halteres, Rosca Scott.\n- **Dica de Ouro:** Evite balançar o"
+        " tronco (roubar no movimento). O controle na descida (fase"
+        " excêntrica) é o segredo para romper as fibras.\n- **Progressão de"
+        " Carga:** Ajuste a carga de forma progressiva sem comprometer a"
+        " postura."
+    )
+  elif "Tríceps" in subgrupo:
+    st.markdown("#### 💥 Foco: Tríceps (Superiores)")
+    st.markdown(
+        "- **Principais Exercícios:** Tríceps na Polia (Corda ou Barra Reta),"
+        " Tríceps Testa, Supino Fechado.\n- **Dica de Ouro:** Mantenha os"
+        " cotovelos fixos ao lado do corpo para isolar completamente o"
+        " tricepes.\n- **Progressão de Carga:** Busque falha concêntrica segura"
+        " nas últimas séries."
+    )
+  elif "Deltoides" in subgrupo:
+    st.markdown("#### 💥 Foco: Deltoides / Ombros (Superiores)")
+    st.markdown(
+        "- **Principais Exercícios:** Desenvolvimento com Halteres, Elevação"
+        " Lateral na Polia ou com Halteres, Crucifixo Inverso.\n- **Dica de"
+        " Ouro:** O feixe lateral do ombro dá a largura visual do tronco;"
+        " foque na elevação lateral com execução controlada e sem impulsos.\n-"
+        " **Progressão de Carga:** Use cargas moderadas com foco em"
+        " conexões mente-músculo."
+    )
+  elif "Quadríceps" in subgrupo:
+    st.markdown("#### 💥 Foco: Quadríceps (Inferiores)")
+    st.markdown(
+        "- **Principais Exercícios:** Agachamento Livre, Leg Press 45°, Cadeira"
+        " Extensora.\n- **Dica de Ouro:** Mantenha os calcanhares apoiados e o"
+        " tronco erguido para maximizar o recrutamento da parte anterior da"
+        " coxa.\n- **Progressão de Carga:** Respeite o intervalo de descanso"
+        " (2 a 3 minutos) devido à alta demanda energética."
+    )
+  elif "Posteriores" in subgrupo:
+    st.markdown("#### 💥 Foco: Posteriores de Coxa (Inferiores)")
+    st.markdown(
+        "- **Principais Exercícios:** Stiff com Barra, Mesa Flexora, Cadeira"
+        " Flexora.\n- **Dica de Ouro:** Inicie o movimento jogando o quadril"
+        " para trás (dobradiça de quadril) antes de dobrar os joelhos no"
+        " Stiff.\n- **Progressão de Carga:** Mantenha a tensão contínua na"
+        " musculatura."
+    )
+  else:
+    st.markdown("#### 💥 Foco: Panturrilhas (Inferiores)")
+    st.markdown(
+        "- **Principais Exercícios:** Panturrilha em Pé na Máquina, Panturrilha"
+        " Sentado (Sóleo).\n- **Dica de Ouro:** Faça uma pausa de 1 segundo no"
+        " pico da contração em cima e alongue completamente embaixo.\n-"
+        " **Progressão de Carga:** A panturrilha exige volume e intensidade;"
+        " trabalhe com amplitudes máximas."
+    )
 
 st.markdown("---")
 st.markdown(
-    "<p style='text-align: center; color: #aaa;'>Desenvolvido por Papai Tech"
-    " Inc.</p>",
+    "<p style='text-align: center; color: #707070; font-size: 0.8rem;'>Nutri"
+    " Fit AI © 2026 - Alta Performance & Inteligência Artificial</p>",
     unsafe_allow_html=True,
 )
