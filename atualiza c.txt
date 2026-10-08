@@ -1,0 +1,3 @@
+git add .
+git commit -m "Adicionando seletor por exercicio especifico com ilustracoes anatomicas"
+git push origin main
