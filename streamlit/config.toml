@@ -1,0 +1,13 @@
+# .streamlit/config.toml
+
+[theme]
+primaryColor = "#39FF14"   # Verde Neon Brilhante (Cor de destaque/botões)
+backgroundColor = "#121212" # Fundo Escuro Profundo (Dark Mode)
+secondaryBackgroundColor = "#1E1E1E" # Fundo secundário/caixas
+textColor = "#FAFAFA"      # Texto Claro
+font = "sans-serif"        # Fonte limpa e moderna
+
+[server]
+headless = true
+enableCors = false
+enableXsrfProtection = true
