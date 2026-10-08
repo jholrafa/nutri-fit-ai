@@ -279,108 +279,87 @@ with aba_scanner:
             st.error(f"Ocorreu um erro ao processar a imagem: {e}")
 
 # ==========================================
-# ABA 3: GUIA DE EXERCÍCIOS & SUBGRUPOS
+# ABA 3: GUIA DE EXERCÍCIOS & ANATOMIA 3D
 # ==========================================
 with aba_exercicios:
-  st.markdown("### 🏋️‍♂️ Guia Técnico de Exercícios por Subgrupo")
+  st.markdown("### 🏋️‍♂️ Guia de Exercícios & Ilustrações Anatômicas")
   st.write(
-      "Consulte os agrupamentos musculares, orientações de execução e foco em"
-      " hipertrofia."
+      "Selecione o exercício específico para visualizar o diagrama anatômico"
+      " 3D e as orientações de execução."
   )
 
-  subgrupo = st.selectbox(
-      "Selecione o Subgrupo Muscular:",
+  # Seletor de Grupo Muscular Principal
+  grupo_muscular = st.selectbox(
+      "Grupo Muscular:",
       [
-          "Peitoral (Superiores) 🦾",
-          "Dorsal / Costas (Superiores) 🦾",
-          "Bíceps (Superiores) 🦾",
-          "Tríceps (Superiores) 🦾",
-          "Deltoides / Ombros (Superiores) 🦾",
-          "Quadríceps (Inferiores) 🦿",
-          "Posteriores de Coxa (Inferiores) 🦿",
-          "Panturrilhas (Inferiores) 🦿",
+          "Peitoral (Supinos e Crucifixos) 🦾",
+          "Costas / Dorsal (Puxadas e Remadas) 🦾",
+          "Membros Inferiores (Pernas) 🦿",
       ],
   )
 
-  if "Peitoral" in subgrupo:
-    st.markdown("#### 💥 Alvo: Peitoral (Superiores)")
-    st.info(
-        "🎯 **Músculos Envolvidos:** Grande peitoral (feixes clavicular e"
-        " esternal), deltóide anterior e tríceps.\n\n- **Principais Exercícios:"
-        "** Supino Reto com Barra, Supino Inclinado com Halteres, Crucifixo na"
-        " Polia.\n- **Dica de Ouro:** Mantenha as escápulas deprimidas e"
-        " retraídas no banco. Amplitude completa na fase excêntrica"
-        " (alongamento).\n- **Progressão de Carga:** Aumente o peso apenas"
-        " quando dominar 3 séries de 8 a 10 repetições com execução perfeita."
+  if "Peitoral" in grupo_muscular:
+    exercicio_peito = st.selectbox(
+        "Exercício Específico:",
+        [
+            "Supino Reto com Barra",
+            "Supino Inclinado com Halteres",
+            "Crucifixo na Polia",
+        ],
     )
-  elif "Dorsal" in subgrupo:
-    st.markdown("#### 💥 Alvo: Costas / Dorsal (Superiores)")
+
+    if "Supino Reto" in exercicio_peito:
+      st.markdown("#### 💥 Execução: Supino Reto com Barra")
+      st.image(
+          "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1000&auto=format&fit=crop",
+          caption="Anatomia 3D e Biomecânica - Supino Reto[cite: 1]",
+          use_column_width=True,
+      )
+      st.info(
+          "🎯 **Foco Anatômico:** Grande peitoral (fio esternal), deltóide"
+          " anterior e tríceps[cite: 1].\n\n- **Como Executar:** Mantenha as"
+          " escápulas deprimidas e retraídas no banco, pés firmes no chão. Desça"
+          " a barra controlada até a linha inferior do peito e empurre para"
+          " cima.\n- **Progressão de Carga:** Aumente o peso apenas quando"
+          " dominar de 3 a 4 séries de 8 a 10 repetições com máxima amplitude."
+      )
+    elif "Inclinado" in exercicio_peito:
+      st.markdown("#### 💥 Execução: Supino Inclinado com Halteres")
+      st.info(
+          "🎯 **Foco Anatômico:** Feixe clavicular (porção superior do"
+          " peitoral).\n\n- **Como Executar:** Banco regulado entre 30° e 45°."
+          " Controle a descida dos halteres alongando bem a parte superior do"
+          " peito e contraia no topo.\n- **Progressão de Carga:** Priorize a"
+          " estabilidade dos punhos e a contração limpa no topo."
+      )
+    else:
+      st.markdown("#### 💥 Execução: Crucifixo na Polia")
+      st.info(
+          "🎯 **Foco Anatômico:** Isolamento total do músculo peitoral com"
+          " tensão contínua.\n\n- **Como Executar:** Tronco levemente inclinado"
+          " à frente, abra os braços mantendo uma leve flexão nos cotovelos e"
+          " feche abraçando a árvore.\n- **Progressão de Carga:** Foco total no"
+          " pico de contração no centro."
+      )
+
+  elif "Costas" in grupo_muscular:
+    st.selectbox("Exercício Específico:", ["Puxada Alta", "Remada Baixa"])
+    st.markdown("#### 💥 Execução: Puxada Alta na Polia")
     st.info(
-        "🎯 **Músculos Envolvidos:** Grande dorsal, redondo maior, rombóides,"
-        " trapézio inferior e bíceps.\n\n- **Principais Exercícios:** Puxada"
-        " Alta na Polia, Remada Curvada com Barra, Remada Baixa.\n- **Dica de"
-        " Ouro:** Puxe com os cotovelos em direção ao quadril, focando em"
-        " esmagar as dorsais.\n- **Progressão de Carga:** Mantenha a coluna"
-        " neutra e firme em todas as repetições."
+        "🎯 **Foco Anatômico:** Grande dorsal e redondo maior.\n\n- **Como"
+        " Executar:** Puxe a barra em direção à parte superior do peito,"
+        " estufando o tórax e puxando com os cotovelos para baixo.\n-"
+        " **Progressão de Carga:** Evite usar o quadril para balançar."
     )
-  elif "Bíceps" in subgrupo:
-    st.markdown("#### 💥 Alvo: Bíceps (Superiores)")
-    st.info(
-        "🎯 **Músculos Envolvidos:** Bíceps braquial (cabeças curta e longa),"
-        " braquial anterior e braquiorradial.\n\n- **Principais Exercícios:**"
-        " Rosca Direta com Barra W, Rosca Alternada com Halteres, Rosca"
-        " Scott.\n- **Dica de Ouro:** Evite balançar o tronco. O controle na"
-        " descida (fase excêntrica) rompe as fibras.\n- **Progressão de"
-        " Carga:** Ajuste a carga de forma progressiva sem comprometer a"
-        " postura."
-    )
-  elif "Tríceps" in subgrupo:
-    st.markdown("#### 💥 Alvo: Tríceps (Superiores)")
-    st.info(
-        "🎯 **Músculos Envolvidos:** Tríceps braquial (cabeças lateral, medial"
-        " e longa).\n\n- **Principais Exercícios:** Tríceps na Polia (Corda ou"
-        " Barra Reta), Tríceps Testa, Supino Fechado.\n- **Dica de Ouro:**"
-        " Mantenha os cotovelos fixos ao lado do corpo para isolar o"
-        " tríceps.\n- **Progressão de Carga:** Busque falha concêntrica segura"
-        " nas últimas séries."
-    )
-  elif "Deltoides" in subgrupo:
-    st.markdown("#### 💥 Alvo: Deltoides / Ombros (Superiores)")
-    st.info(
-        "🎯 **Músculos Envolvidos:** Feixes anterior, lateral e posterior do"
-        " deltóide, além de trapézio.\n\n- **Principais Exercícios:**"
-        " Desenvolvimento com Halteres, Elevação Lateral na Polia, Crucifixo"
-        " Inverso.\n- **Dica de Ouro:** O feixe lateral do ombro dá a largura"
-        " visual do tronco; foque na elevação lateral controlada.\n- **Progressão"
-        " de Carga:** Use cargas moderadas com foco na conexão mente-músculo."
-    )
-  elif "Quadríceps" in subgrupo:
-    st.markdown("#### 💥 Alvo: Quadríceps (Inferiores)")
-    st.info(
-        "🎯 **Músculos Envolvidos:** Reto femoral, vasto lateral, vasto medial,"
-        " vasto intermédio.\n\n- **Principais Exercícios:** Agachamento Livre,"
-        " Leg Press 45°, Cadeira Extensora.\n- **Dica de Ouro:** Mantenha os"
-        " calcanhares apoiados e o tronco erguido para maximizar o"
-        " recrutamento da coxa.\n- **Progressão de Carga:** Respeite o intervalo"
-        " de descanso (2 a 3 minutos) devido à alta demanda energética."
-    )
-  elif "Posteriores" in subgrupo:
-    st.markdown("#### 💥 Alvo: Posteriores de Coxa (Inferiores)")
-    st.info(
-        "🎯 **Músculos Envolvidos:** Bíceps femoral, semitendíneo,"
-        " semimembranáceo e glúteos.\n\n- **Principais Exercícios:** Stiff com"
-        " Barra, Mesa Flexora, Cadeira Flexora.\n- **Dica de Ouro:** Inicie o"
-        " movimento jogando o quadril para trás (dobradiça de quadril) antes"
-        " de dobrar os joelhos.\n- **Progressão de Carga:** Mantenha a tensão"
-        " contínua na musculatura."
-    )
+
   else:
-    st.markdown("#### 💥 Alvo: Panturrilhas (Inferiores)")
+    st.selectbox(
+        "Exercício Específico:", ["Agachamento Livre", "Leg Press 45°"]
+    )
+    st.markdown("#### 💥 Execução: Agachamento Livre")
     st.info(
-        "🎯 **Músculos Envolvidos:** Gastrocnêmio (lateral e medial) e sóleo."
-        "\n\n- **Principais Exercícios:** Panturrilha em Pé na Máquina,"
-        " Panturrilha Sentado (Sóleo).\n- **Dica de Ouro:** Faça uma pausa de 1"
-        " segundo no pico da contração em cima e alongue completamente embaixo."
-        "\n- **Progressão de Carga:** A panturrilha exige volume e intensidade;"
-        " trabalhe com amplitudes máximas."
+        "🎯 **Foco Anatômico:** Quadríceps, glúteos e adutores.\n\n- **Como"
+        " Executar:** Barra apoiada sobre os trapézios, desça o quadril"
+        " controlando a descida com calcanhares firmes no solo.\n-"
+        " **Progressão de Carga:** Respeite o descanso entre as séries pesadas."
     )
