@@ -305,8 +305,8 @@ with aba_exercicios:
   if "Peitoral" in subgrupo:
     st.markdown("#### 💥 Foco: Peitoral (Superiores)")
     st.image(
-        "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1000&auto=format&fit=crop",
-        caption="Treino de Peitoral e Força",
+        "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=1000&auto=format&fit=crop",
+        caption="Treino de Peitoral e Supino",
         use_column_width=True,
     )
     st.markdown(
@@ -320,8 +320,8 @@ with aba_exercicios:
   elif "Dorsal" in subgrupo:
     st.markdown("#### 💥 Foco: Costas / Dorsal (Superiores)")
     st.image(
-        "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?q=80&w=1000&auto=format&fit=crop",
-        caption="Treino de Costas e Espessura",
+        "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1000&auto=format&fit=crop",
+        caption="Treino de Dorsal e Puxadas",
         use_column_width=True,
     )
     st.markdown(
