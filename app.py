@@ -1,5 +1,7 @@
 from datetime import datetime
 import os
+import base64
+import io
 import streamlit as st
 from PIL import Image
 from openai import OpenAI
@@ -49,7 +51,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Inicialização Blindada do Cliente OpenAI via Streamlit Secrets
+# Inicialização Blindada do Cliente OpenAI (Local e Nuvem)
 api_key = None
 try:
   if "OPENAI_API_KEY" in st.secrets:
@@ -57,19 +59,135 @@ try:
 except Exception:
   pass
 
-# Fallback para variável de ambiente local se houver
 if not api_key:
   api_key = os.environ.get("OPENAI_API_KEY")
 
 client = OpenAI(api_key=api_key) if api_key else None
 
-# Inicializar o Session State para o Histórico e Metas Diárias
+# Inicializar o Session State para o Controle de Acesso e Histórico
+if "usuario_logado" not in st.session_state:
+  st.session_state.usuario_logado = False
+if "email_usuario" not in st.session_state:
+  st.session_state.email_usuario = ""
+if "plano_ativo" not in st.session_state:
+  st.session_state.plano_ativo = False
+
 if "historico_refeicoes" not in st.session_state:
   st.session_state.historico_refeicoes = []
 if "calorias_meta" not in st.session_state:
   st.session_state.calorias_meta = 2000
 if "proteina_meta" not in st.session_state:
   st.session_state.proteina_meta = 160
+
+# ==========================================
+# BARREIRA 1: TELA DE LOGIN / CADASTRO
+# ==========================================
+if not st.session_state.usuario_logado:
+  st.markdown(
+      "<h2 style='text-align: center;'>🔐 Acesso Restrito - Nutri Fit AI</h2>",
+      unsafe_allow_html=True,
+  )
+  st.markdown(
+      "<p style='text-align: center;'>Faça login ou cadastre-se para acessar"
+      " seu personal e nutricionista na nuvem.</p>",
+      unsafe_allow_html=True,
+  )
+
+  tab_login, tab_cadastro = st.tabs(["🔑 Entrar", "📝 Criar Conta"])
+
+  with tab_login:
+    st.markdown("### Acesse sua conta")
+    email_login = st.text_input("E-mail", key="login_email")
+    senha_login = st.text_input("Senha", type="password", key="login_senha")
+
+    if st.button("🚀 Entrar no App"):
+      if email_login.strip() != "":
+        st.session_state.usuario_logado = True
+        st.session_state.email_usuario = email_login
+        st.success("Login realizado com sucesso!")
+        st.rerun()
+      else:
+        st.error("Por favor, digite seu e-mail.")
+
+  with tab_cadastro:
+    st.markdown("### Crie sua conta e comece agora")
+    nome_cad = st.text_input("Nome Completo")
+    email_cad = st.text_input("E-mail", key="cad_email")
+    senha_cad = st.text_input("Senha", type="password", key="cad_senha")
+
+    if st.button("✨ Cadastrar e Ir para os Planos"):
+      if email_cad.strip() != "" and senha_cad.strip() != "":
+        st.session_state.usuario_logado = True
+        st.session_state.email_usuario = email_cad
+        st.success("Conta criada! Redirecionando para seleção de planos...")
+        st.rerun()
+      else:
+        st.error("Preencha todos os campos para continuar.")
+
+  st.stop()
+
+# ==========================================
+# BARREIRA 2: TELA DE SELEÇÃO DE PLANOS & PIX
+# ==========================================
+if not st.session_state.plano_ativo:
+    st.markdown(
+        "<h2 style='text-align: center;'>💳 Checkout & Planos - Nutri Fit AI</h2>",
+        unsafe_allow_html=True,
+    )
+    st.info(
+        "Escolha o seu plano abaixo e finalize o pagamento com total segurança através da Stripe:"
+    )
+
+    aba_varejo, aba_b2b = st.tabs(
+        [
+            "🛍️ Plano Varejo (R$ 49,90/mês)",
+            "🏢 Licença B2B Academias (R$ 297,00/mês)",
+        ]
+    )
+
+    with aba_varejo:
+        st.markdown("### 🔥 Plano Aluno Fit - Individual")
+        st.markdown(
+            "- ✅ Scanner Ilimitado de Refeições por IA\n- ✅ Controle de Macros e Painel Diário\n- ✅ Guia Master de Exercícios 3D"
+        )
+        st.markdown("#### 💰 Valor: **R$ 49,90 / mês**")
+        st.markdown("---")
+        st.markdown("#### 🚀 Pagamento Seguro via Stripe (Pix ou Cartão)")
+        st.write(
+            "Clique no botão abaixo para abrir a página oficial de pagamento da Stripe:"
+        )
+
+        # Botão oficial da Stripe para o Plano Varejo
+        st.link_button(
+            "Assinar Plano Varejo (Stripe)", 
+            "https://buy.stripe.com/6oU8wO65b6Km4WJ6Fzd3i00",
+            use_container_width=True
+        )
+
+    with aba_b2b:
+        st.markdown("### 🏢 Licença Corporativa - Academias & Personals")
+        st.markdown(
+            "- ✅ Até 30 Acessos Simultâneos para Alunos\n- ✅ Scanner de IA Prioritário\n- ✅ Suporte Exclusivo e Gestão de Alunos"
+        )
+        st.markdown("#### 💰 Valor: **R$ 297,00 / mês**")
+        st.markdown("---")
+        st.markdown("#### 🤝 Atendimento Comercial Exclusivo")
+        st.write(
+            "Para fechar a licença corporativa da academia com negociação personalizada, fale direto com nossa equipe:"
+        )
+        st.info("Entre em contato pelo atendimento direto para liberação da chave mestra da academia.")
+
+    st.markdown("---")
+    if st.button("🚪 Sair / Trocar de Conta"):
+        st.session_state.usuario_logado = False
+        st.session_state.email_usuario = ""
+        st.rerun()
+
+    st.stop()
+
+# ==========================================
+# APLICATIVO PRINCIPAL (APÓS LOGIN E PAGAMENTO)
+# ==========================================
 
 # Dicionário de dias da semana em português
 dias_semana_pt = {
@@ -86,14 +204,22 @@ dia_ingles = datetime.now().strftime("%A")
 dia_atual = dias_semana_pt.get(dia_ingles, dia_ingles)
 data_hoje = datetime.now().strftime("%d/%m/%Y")
 
-# Título Principal do App
+# Cabeçalho com botão de Logout
+col_topo1, col_topo2 = st.columns([0.8, 0.2])
+with col_topo1:
+  st.markdown(
+      "<h1 style='text-align: left;'>⚡ Nutri Fit AI</h1>",
+      unsafe_allow_html=True,
+  )
+with col_topo2:
+  if st.button("🚪 Sair"):
+    st.session_state.usuario_logado = False
+    st.session_state.plano_ativo = False
+    st.rerun()
+
 st.markdown(
-    "<h1 style='text-align: center;'>⚡ Nutri Fit AI</h1>",
-    unsafe_allow_html=True,
-)
-st.markdown(
-    f"<h5 style='text-align: center; color: #00FF66;'>📅 {dia_atual}, {data_hoje}"
-    "</h5>",
+    f"<h5 style='color: #00FF66;'>📅 {dia_atual}, {data_hoje} | Logado como:"
+    f" <b>{st.session_state.email_usuario}</b></h5>",
     unsafe_allow_html=True,
 )
 st.markdown("---")
@@ -185,10 +311,9 @@ with aba_scanner:
   st.markdown("### 📸 Scanner Inteligente por Câmera & Histórico de Hoje")
   st.write(
       "Tire a foto da refeição direto pela câmera ou envie um arquivo. A IA"
-      " calcula e acumula no seu dia."
+      " conta os pedaços e acumula no seu dia."
   )
 
-  # --- PAINEL DE RESUMO E ALERTAS DO DIA ---
   total_calorias_consumidas = sum(
       [r["calorias"] for r in st.session_state.historico_refeicoes]
   )
@@ -211,7 +336,6 @@ with aba_scanner:
       f"{total_proteinas_consumidas}g / {meta_p}g",
   )
 
-  # --- LÓGICA DE ALERTAS INTELIGENTES ---
   diferenca_calorias = meta_c - total_calorias_consumidas
   if total_calorias_consumidas == 0:
     st.info(
@@ -236,7 +360,6 @@ with aba_scanner:
     )
   st.markdown("---")
 
-  # Escolha entre Câmera Ao Vivo ou Upload de Arquivo
   modo_captura = st.radio(
       "Como deseja enviar a foto?",
       ["📷 Tirar foto com a Câmera ao Vivo", "📁 Enviar arquivo de imagem"],
@@ -262,76 +385,113 @@ with aba_scanner:
         use_container_width=True,
     )
 
-    col_input1, col_input2 = st.columns(2)
-    calorias_estimadas_input = col_input1.number_input(
-        "Calorias Estimadas (kcal)", min_value=0, max_value=3000, value=450
-    )
-    proteina_estimada_input = col_input2.number_input(
-        "Proteína Estimada (g)", min_value=0, max_value=300, value=35
-    )
-
     if st.button("🔍 Analisar Prato e Adicionar ao Histórico do Dia"):
       if not client:
         st.error(
             "Erro: Chave da OpenAI não configurada. Verifique os Secrets."
         )
       else:
-        with st.spinner("IA calculando calorias e gravando no histórico..."):
+        with st.spinner(
+            "IA contando os pedaços e calculando os macros totais..."
+        ):
           try:
+            buffered = io.BytesIO()
+            imagem_para_analise.save(buffered, format="JPEG")
+            img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+
             resposta = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {
                         "role": "system",
                         "content": (
-                            "Você é um nutricionista esportivo rigoroso."
-                            " Analise se a imagem é comida. Se for objeto"
-                            " inválido (tijolo, animal, selfie), retorne"
-                            " 'ERRO_IMAGEM_INVALIDA'. Se for comida, dê um"
-                            " feedback curto dos macros em Markdown."
+                            "Você é um nutricionista esportivo rigoroso. Analise"
+                            " a foto do alimento enviado. **CONTE visualmente"
+                            " quantos pedaços, unidades ou porções existem no"
+                            " prato ou recipiente** (por exemplo: se houver 4"
+                            " pedaços de frango, calcule o total somando os 4"
+                            " pedaços). Estime as calorias totais e as"
+                            " proteínas totais de TUDO o que está visível na"
+                            " imagem. Forneça o parecer nutricional em Markdown"
+                            " detalhando a quantidade contada e, obrigatoriamente,"
+                            " no final de tudo, escreva exatamente assim em"
+                            " duas linhas separadas:\nCALORIAS: [número total]\nPROTEINA:"
+                            " [número total]"
                         ),
                     },
-                    {"role": "user", "content": "Analise esta refeição."},
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": (
+                                    "Analise este alimento, conte os pedaços"
+                                    " presentes e forneça o total de macros"
+                                    " estimados."
+                                ),
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{img_str}"
+                                },
+                            },
+                        ],
+                    },
                 ],
             )
             resultado_ia = resposta.choices[0].message.content
 
-            if "ERRO_IMAGEM_INVALIDA" in resultado_ia:
-              st.error(
-                  "🚨 **Alerta:** A imagem não parece ser uma refeição válida."
-                  " Tire uma foto clara de comida."
-              )
-            else:
-              horario_atual = datetime.now().strftime("%H:%M")
+            import re
 
-              st.session_state.historico_refeicoes.append({
-                  "horario": horario_atual,
-                  "descricao": "Refeição Escaneada",
-                  "calorias": int(calorias_estimadas_input),
-                  "proteina": int(proteina_estimada_input),
-              })
+            calorias_detectadas = 200
+            proteina_detectada = 2
 
-              st.success(
-                  f"✅ Refeição registrada com sucesso às {horario_atual}!"
-              )
-              st.markdown("### 📋 Parecer do Nutri AI")
-              st.markdown(resultado_ia)
-              st.rerun()
+            match_cals = re.search(
+                r"CALORIAS:\s*(\d+)", resultado_ia, re.IGNORECASE
+            )
+            match_prot = re.search(
+                r"PROTEINA:\s*(\d+)", resultado_ia, re.IGNORECASE
+            )
+
+            if match_cals:
+              calorias_detectadas = int(match_cals.group(1))
+            if match_prot:
+              proteina_detectada = int(match_prot.group(1))
+
+            horario_atual = datetime.now().strftime("%H:%M")
+
+            st.session_state.historico_refeicoes.append({
+                "horario": horario_atual,
+                "descricao": "Refeição Escaneada pela IA",
+                "calorias": calorias_detectadas,
+                "proteina": proteina_detectada,
+            })
+
+            st.success(f"✅ Refeição registrada com sucesso às {horario_atual}!")
+            st.markdown("### 📋 Parecer do Nutri AI")
+            st.markdown(resultado_ia)
+            st.rerun()
           except Exception as e:
             st.error(f"Erro ao processar com IA: {e}")
 
-  # --- EXIBIÇÃO DO HISTÓRICO DO DIA ---
   st.markdown("### 📜 Histórico de Refeições de Hoje")
   if len(st.session_state.historico_refeicoes) == 0:
     st.write("Nenhuma refeição no histórico de hoje ainda.")
   else:
     for idx, ref in enumerate(st.session_state.historico_refeicoes):
-      st.markdown(
-          f"**{idx+1}. Horário:** {ref['horario']} | **Calorias:**"
-          f" `{ref['calorias']} kcal` | **Proteína:** `{ref['proteina']}g`"
-      )
+      col_item1, col_item2 = st.columns([0.8, 0.2])
+      with col_item1:
+        st.markdown(
+            f"**{idx+1}. Horário:** {ref['horario']} | **Calorias:**"
+            f" `{ref['calorias']} kcal` | **Proteína:** `{ref['proteina']}g`"
+        )
+      with col_item2:
+        if st.button("🗑️", key=f"del_ref_{idx}"):
+          st.session_state.historico_refeicoes.pop(idx)
+          st.rerun()
 
-    if st.button("🗑️ Limpar Histórico do Dia"):
+    if st.button("🗑️ Limpar Histórico do Dia Inteiro"):
       st.session_state.historico_refeicoes = []
       st.rerun()
 
