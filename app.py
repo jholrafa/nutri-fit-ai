@@ -157,6 +157,7 @@ if not st.session_state.plano_ativo:
     aba_varejo, aba_b2b = st.tabs(
         [
             "🛍️ Plano Varejo (R$ 49,90/mês)",
+            "🏢 Licença B2B Academias (R$ 3,000/mês)",
             
         ]
     )
