@@ -129,6 +129,20 @@ if not st.session_state.usuario_logado:
 # ==========================================
 # BARREIRA 2: TELA DE SELEÇÃO DE PLANOS & PIX
 # ==========================================
+# Lista de e-mails administradores com passe livre automático
+EMAILS_ADMIN = ["jholrafa31@gmail.com", "jholrafa@gmail.com"]  # Seus e-mails cadastrados
+
+# Se o usuário logado for admin, libera o acesso automaticamente sem cobrar nada
+if "email_usuario" in st.session_state and st.session_state.email_usuario in EMAILS_ADMIN:
+    st.session_state.plano_ativo = True
+
+# Bloco do checkout (só aparece se o plano NÃO estiver ativo)
+if not st.session_state.plano_ativo:
+    st.markdown(
+        "<h2 style='text-align: center;'>💳 Checkout & Planos - Nutri Fit AI</h2>",
+        unsafe_allow_html=True,
+    )
+    # ... (o restante do código do link oficial da Stripe que a gente colou antes)
 if not st.session_state.plano_ativo:
     st.markdown(
         "<h2 style='text-align: center;'>💳 Checkout & Planos - Nutri Fit AI</h2>",
