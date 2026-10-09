@@ -129,20 +129,7 @@ if not st.session_state.usuario_logado:
 # ==========================================
 # BARREIRA 2: TELA DE SELEÇÃO DE PLANOS & PIX
 # ==========================================
-# Lista de e-mails administradores com passe livre automático
-EMAILS_ADMIN = ["jholrafa31@gmail.com", "jholrafa@gmail.com"]  # Seus e-mails cadastrados
 
-# Se o usuário logado for admin, libera o acesso automaticamente sem cobrar nada
-if "email_usuario" in st.session_state and st.session_state.email_usuario in EMAILS_ADMIN:
-    st.session_state.plano_ativo = True
-
-# Bloco do checkout (só aparece se o plano NÃO estiver ativo)
-if not st.session_state.plano_ativo:
-    st.markdown(
-        "<h2 style='text-align: center;'>💳 Checkout & Planos - Nutri Fit AI</h2>",
-        unsafe_allow_html=True,
-    )
-    # ... (o restante do código do link oficial da Stripe que a gente colou antes)
 if not st.session_state.plano_ativo:
     st.markdown(
         "<h2 style='text-align: center;'>💳 Checkout & Planos - Nutri Fit AI</h2>",
@@ -322,192 +309,177 @@ with aba_metas:
 # ABA 2: SCANNER, HISTÓRICO, CÂMERA & ACUMULADOR
 # ==========================================
 with aba_scanner:
-  st.markdown("### 📸 Scanner Inteligente por Câmera & Histórico de Hoje")
-  st.write(
-      "Tire a foto da refeição direto pela câmera ou envie um arquivo. A IA"
-      " conta os pedaços e acumula no seu dia."
-  )
-
-  total_calorias_consumidas = sum(
-      [r["calorias"] for r in st.session_state.historico_refeicoes]
-  )
-  total_proteinas_consumidas = sum(
-      [r["proteina"] for r in st.session_state.historico_refeicoes]
-  )
-
-  meta_c = st.session_state.calorias_meta
-  meta_p = st.session_state.proteina_meta
-
-  st.markdown("---")
-  st.markdown(f"#### 📊 Painel Diário: {dia_atual}")
-  col_p1, col_p2 = st.columns(2)
-  col_p1.metric(
-      "Calorias Consumidas / Meta",
-      f"{total_calorias_consumidas} / {meta_c} kcal",
-  )
-  col_p2.metric(
-      "Proteínas Consumidas / Meta",
-      f"{total_proteinas_consumidas}g / {meta_p}g",
-  )
-
-  diferenca_calorias = meta_c - total_calorias_consumidas
-  if total_calorias_consumidas == 0:
-    st.info(
-        "💡 **Status:** Nenhuma refeição registrada hoje. Tire a foto da sua"
-        " primeira refeição abaixo!"
-    )
-  elif diferenca_calorias > 300:
-    st.info(
-        f"🔥 **Alerta Nutricional:** Faltam cerca de {diferenca_calorias} kcal"
-        " para atingir sua meta de hoje. Continue firme!"
-    )
-  elif 0 <= diferenca_calorias <= 300:
-    st.success(
-        "🎯 **Alerta Nutricional:** Você está bem próximo da sua meta calórica"
-        " diária! Excelente controle."
-    )
-  else:
-    excesso = abs(diferenca_calorias)
-    st.warning(
-        f"⚠️ **Alerta Nutricional:** Atenção! Você ultrapassou a meta de hoje"
-        " em {excesso} kcal."
-    )
-  st.markdown("---")
-
-  modo_captura = st.radio(
-      "Como deseja enviar a foto?",
-      ["📷 Tirar foto com a Câmera ao Vivo", "📁 Enviar arquivo de imagem"],
-  )
-
-  imagem_para_analise = None
-
-  if modo_captura == "📷 Tirar foto com a Câmera ao Vivo":
-    imagem_camera = st.camera_input("Posicione o prato e clique em 'Tirar foto'")
-    if imagem_camera is not None:
-      imagem_para_analise = Image.open(imagem_camera)
-  else:
-    arquivo_foto = st.file_uploader(
-        "Escolha o arquivo de foto...", type=["jpg", "jpeg", "png"]
-    )
-    if arquivo_foto is not None:
-      imagem_para_analise = Image.open(arquivo_foto)
-
-  if imagem_para_analise is not None:
-    st.image(
-        imagem_para_analise,
-        caption="Refeição capturada para análise da IA",
-        use_container_width=True,
+    st.markdown("### 📸 Scanner Inteligente por Câmera & Histórico de Hoje")
+    st.write(
+        "Tire a foto da refeição direto pela câmera ou envie um arquivo. A IA conta os pedaços e acumula no seu dia."
     )
 
-    if st.button("🔍 Analisar Prato e Adicionar ao Histórico do Dia"):
-      if not client:
-        st.error(
-            "Erro: Chave da OpenAI não configurada. Verifique os Secrets."
+    total_calorias_consumidas = sum(
+        [r["calorias"] for r in st.session_state.historico_refeicoes]
+    )
+    total_proteinas_consumidas = sum(
+        [r["proteina"] for r in st.session_state.historico_refeicoes]
+    )
+
+    meta_c = st.session_state.calorias_meta
+    meta_p = st.session_state.proteina_meta
+
+    st.markdown("---")
+    st.markdown(f"#### 📊 Painel Diário: {dia_atual}")
+    col_p1, col_p2 = st.columns(2)
+    col_p1.metric(
+        "Calorias Consumidas / Meta",
+        f"{total_calorias_consumidas} / {meta_c} kcal",
+    )
+    col_p2.metric(
+        "Proteínas Consumidas / Meta",
+        f"{total_proteinas_consumidas}g / {meta_p}g",
+    )
+
+    diferenca_calorias = meta_c - total_calorias_consumidas
+    if total_calorias_consumidas == 0:
+        st.info(
+            "💡 **Status:** Nenhuma refeição registrada hoje. Tire a foto da sua primeira refeição abaixo!"
         )
-      else:
-        with st.spinner(
-            "IA contando os pedaços e calculando os macros totais..."
-        ):
-          try:
-            buffered = io.BytesIO()
-            imagem_para_analise.save(buffered, format="JPEG")
-            img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    elif diferenca_calorias > 300:
+        st.info(
+            f"🔥 **Alerta Nutricional:** Faltam cerca de {diferenca_calorias} kcal para atingir sua meta de hoje. Continue firme!"
+        )
+    elif 0 <= diferenca_calorias <= 300:
+        st.success(
+            "🎯 **Alerta Nutricional:** Você está bem próximo da sua meta calórica diária! Excelente controle."
+        )
+    else:
+        excesso = abs(diferenca_calorias)
+        st.warning(
+            f"⚠️ **Alerta Nutricional:** Atenção! Você ultrapassou a meta de hoje em {excesso} kcal."
+        )
+    st.markdown("---")
 
-            resposta = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "Você é um nutricionista esportivo rigoroso. Analise"
-                            " a foto do alimento enviado. **CONTE visualmente"
-                            " quantos pedaços, unidades ou porções existem no"
-                            " prato ou recipiente** (por exemplo: se houver 4"
-                            " pedaços de frango, calcule o total somando os 4"
-                            " pedaços). Estime as calorias totais e as"
-                            " proteínas totais de TUDO o que está visível na"
-                            " imagem. Forneça o parecer nutricional em Markdown"
-                            " detalhando a quantidade contada e, obrigatoriamente,"
-                            " no final de tudo, escreva exatamente assim em"
-                            " duas linhas separadas:\nCALORIAS: [número total]\nPROTEINA:"
-                            " [número total]"
-                        ),
-                    },
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": (
-                                    "Analise este alimento, conte os pedaços"
-                                    " presentes e forneça o total de macros"
-                                    " estimados."
-                                ),
-                            },
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{img_str}"
+    modo_captura = st.radio(
+        "Como deseja enviar a foto?",
+        ["📷 Tirar foto com a Câmera ao Vivo", "📁 Enviar arquivo de imagem"],
+    )
+
+    imagem_para_analise = None
+
+    if modo_captura == "📷 Tirar foto com a Câmera ao Vivo":
+        imagem_camera = st.camera_input("Posicione o prato e clique em 'Tirar foto'")
+        if imagem_camera is not None:
+            imagem_para_analise = Image.open(imagem_camera)
+    else:
+        arquivo_foto = st.file_uploader(
+            "Escolha o arquivo de foto...", type=["jpg", "jpeg", "png"]
+        )
+        if arquivo_foto is not None:
+            imagem_para_analise = Image.open(arquivo_foto)
+
+    if imagem_para_analise is not None:
+        st.image(
+            imagem_para_analise,
+            caption="Refeição capturada para análise da IA",
+            use_container_width=True,
+        )
+
+        if st.button("🔍 Analisar Prato e Adicionar ao Histórico do Dia"):
+            if not client:
+                st.error("Erro: Chave da OpenAI não configurada. Verifique os Secrets.")
+            else:
+                with st.spinner("IA inspecionando o prato e bloqueando intrometidos..."):
+                    try:
+                        buffered = io.BytesIO()
+                        imagem_para_analise.save(buffered, format="JPEG")
+                        img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+                        resposta = client.chat.completions.create(
+                            model="gpt-4o-mini",
+                            messages=[
+                                {
+                                    "role": "system",
+                                    "content": (
+                                        "Voce e o nutricionista esportivo mais implacavel e rigoroso do mundo. "
+                                        "Sua missao e analisar a imagem enviada com tolerancia zero para pegadinhas.\n\n"
+                                        "PROTOCOLO DE REJEICAO ABSOLUTA:\n"
+                                        "Se a imagem contiver qualquer um dos itens abaixo, RECUSE IMEDIATAMENTE a analise nutricional, "
+                                        "explique com firmeza o que foi detectado e atribua zero calorias e zero proteina:\n"
+                                        "- Documentos (CNH, RG, CPF, cartoes, papeis).\n"
+                                        "- Eletronicos ou objetos (Power banks, celulares, controles, relogios, copos ou garrafas vazias).\n"
+                                        "- Cosmeticos ou higiene (Desodorantes, perfumes, cremes).\n"
+                                        "- Quaisquer objetos solidos que NAO contenham comida.\n\n"
+                                        "O QUE E PERMITIDO:\n"
+                                        "- Pratos de comida, marmitas, alimentos (frutas, carnes, ovos, arroz, massas).\n"
+                                        "- Embalagens de alimentos legitimas (saquinho de hamburguer, caixa de pizza, copo de delivery).\n\n"
+                                        "Se for comida valida, CONTE visualmente as porcoes e estime o total de calorias e proteinas com precisao realista.\n"
+                                        "Forneca o parecer em Markdown e, obrigatoriamente, no final de tudo, escreva exatamente assim em duas linhas separadas:\n"
+                                        "CALORIAS: [numero total]\nPROTEINA: [numero total]"
+                                    ),
                                 },
-                            },
-                        ],
-                    },
-                ],
-            )
-            resultado_ia = resposta.choices[0].message.content
+                                {
+                                    "role": "user",
+                                    "content": [
+                                        {
+                                            "type": "text",
+                                            "text": "Analise esta imagem. Se for comida ou embalagem de comida, calcule os macros. Se for objeto ou documento, recuse."
+                                        },
+                                        {
+                                            "type": "image_url",
+                                            "image_url": {
+                                                "url": f"data:image/jpeg;base64,{img_str}"
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                        )
+                        resultado_ia = resposta.choices[0].message.content
 
-            import re
+                        import re
 
-            calorias_detectadas = 200
-            proteina_detectada = 2
+                        calorias_detectadas = 0
+                        proteina_detectada = 0
 
-            match_cals = re.search(
-                r"CALORIAS:\s*(\d+)", resultado_ia, re.IGNORECASE
-            )
-            match_prot = re.search(
-                r"PROTEINA:\s*(\d+)", resultado_ia, re.IGNORECASE
-            )
+                        match_cals = re.search(r"CALORIAS:\s*(\d+)", resultado_ia, re.IGNORECASE)
+                        match_prot = re.search(r"PROTEINA:\s*(\d+)", resultado_ia, re.IGNORECASE)
 
-            if match_cals:
-              calorias_detectadas = int(match_cals.group(1))
-            if match_prot:
-              proteina_detectada = int(match_prot.group(1))
+                        if match_cals:
+                            calorias_detectadas = int(match_cals.group(1))
+                        if match_prot:
+                            proteina_detectada = int(match_prot.group(1))
 
-            horario_atual = datetime.now().strftime("%H:%M")
+                        horario_atual = datetime.now().strftime("%H:%M")
 
-            st.session_state.historico_refeicoes.append({
-                "horario": horario_atual,
-                "descricao": "Refeição Escaneada pela IA",
-                "calorias": calorias_detectadas,
-                "proteina": proteina_detectada,
-            })
+                        st.session_state.historico_refeicoes.append({
+                            "horario": horario_atual,
+                            "descricao": "Refeição Escaneada pela IA",
+                            "calorias": calorias_detectadas,
+                            "proteina": proteina_detectada,
+                        })
 
-            st.success(f"✅ Refeição registrada com sucesso às {horario_atual}!")
-            st.markdown("### 📋 Parecer do Nutri AI")
-            st.markdown(resultado_ia)
+                        st.success(f"✅ Análise concluída às {horario_atual}!")
+                        st.markdown("### 📋 Parecer do Nutri AI")
+                        st.markdown(resultado_ia)
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Erro ao processar com IA: {e}")
+
+    st.markdown("### 📜 Histórico de Refeições de Hoje")
+    if len(st.session_state.historico_refeicoes) == 0:
+        st.write("Nenhuma refeição no histórico de hoje ainda.")
+    else:
+        for idx, ref in enumerate(st.session_state.historico_refeicoes):
+            col_item1, col_item2 = st.columns([0.8, 0.2])
+            with col_item1:
+                st.markdown(
+                    f"**{idx+1}. Horário:** {ref['horario']} | **Calorias:** `{ref['calorias']} kcal` | **Proteína:** `{ref['proteina']}g`"
+                )
+            with col_item2:
+                if st.button("🗑️", key=f"del_ref_{idx}"):
+                    st.session_state.historico_refeicoes.pop(idx)
+                    st.rerun()
+
+        if st.button("🗑️ Limpar Histórico do Dia Inteiro"):
+            st.session_state.historico_refeicoes = []
             st.rerun()
-          except Exception as e:
-            st.error(f"Erro ao processar com IA: {e}")
-
-  st.markdown("### 📜 Histórico de Refeições de Hoje")
-  if len(st.session_state.historico_refeicoes) == 0:
-    st.write("Nenhuma refeição no histórico de hoje ainda.")
-  else:
-    for idx, ref in enumerate(st.session_state.historico_refeicoes):
-      col_item1, col_item2 = st.columns([0.8, 0.2])
-      with col_item1:
-        st.markdown(
-            f"**{idx+1}. Horário:** {ref['horario']} | **Calorias:**"
-            f" `{ref['calorias']} kcal` | **Proteína:** `{ref['proteina']}g`"
-        )
-      with col_item2:
-        if st.button("🗑️", key=f"del_ref_{idx}"):
-          st.session_state.historico_refeicoes.pop(idx)
-          st.rerun()
-
-    if st.button("🗑️ Limpar Histórico do Dia Inteiro"):
-      st.session_state.historico_refeicoes = []
-      st.rerun()
 
 # ==========================================
 # ABA 3: GUIA MASTER DE EXERCÍCIOS & ANATOMIA 3D
