@@ -1,10 +1,15 @@
-from datetime import datetime
-import os
 import base64
+from datetime import datetime, timedelta, timezone
 import io
-import streamlit as st
+import os
 from PIL import Image
+import streamlit as st
 from openai import OpenAI
+
+# Fuso horário de Brasília (UTC-3)
+FUSO_BRASILIA = timezone(timedelta(hours=-3))
+horario_atual = datetime.now(FUSO_BRASILIA).strftime("%H:%M")
+dia_atual = datetime.now(FUSO_BRASILIA).strftime("%d/%m/%Y")
 
 # Configuração da página do Streamlit
 st.set_page_config(
@@ -496,6 +501,16 @@ with aba_scanner:
         if st.button("🗑️ Limpar Histórico do Dia Inteiro"):
             st.session_state.historico_refeicoes = []
             st.rerun()
+
+    st.markdown("---")
+    st.markdown(
+        "<p style='font-size: 0.8rem; color: #888;'>⚠️ <b>Aviso Legal:</b> As"
+        " estimativas nutricionais geradas por Inteligência Artificial são"
+        " aproximações e podem conter margens de erro. Em caso de dúvidas ou"
+        " suporte técnico, entre em contato pelo e-mail: <a"
+        " href='mailto:jholrafa31@gmail.com'>newexitsuplementos@gmail.com</a></p>",
+        unsafe_allow_html=True,
+    )       
 
 # ==========================================
 # ABA 3: GUIA MASTER DE EXERCÍCIOS & ANATOMIA 3D
