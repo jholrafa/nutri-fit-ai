@@ -331,6 +331,10 @@ with aba_metas:
 # ==========================================
 with aba_scanner:
     st.markdown("### 📸 Scanner Inteligente por Câmera & Histórico de Hoje")
+    
+    # 🕒 LINHA DO RELÓGIO QUE FAZ APARECER NA TELA:
+    st.markdown(f"🕒 **Horário atual:** {horario_atual} | 📅 **Data:** {dia_atual}")
+    
     st.write(
         "Tire a foto da refeição direto pela câmera ou envie um arquivo. A IA conta os pedaços e acumula no seu dia."
     )
