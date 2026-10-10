@@ -417,44 +417,48 @@ with aba_scanner:
                         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
                         resposta = client.chat.completions.create(
-                            model="gpt-4o-mini",
-                            messages=[
+                            model="gpt-4o",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": (
+                                "Voce e o nutricionista esportivo mais implacavel, rigoroso e experiente do mundo, "
+                                "especializado em estimativa visual de macronutrientes para atletas e praticantes de musculacao.\n\n"
+                                "PROTOCOLO DE REJEICAO ABSOLUTA:\n"
+                                "Se a imagem contiver qualquer um dos itens abaixo, RECUSE IMEDIATAMENTE a analise nutricional, "
+                                "explique com firmeza o que foi detectado e atribua zero calorias e zero proteina:\n"
+                                "- Documentos (CNH, RG, CPF, cartoes, papeis).\n"
+                                "- Eletronicos ou objetos (Power banks, celulares, controles, relogios, copos ou garrafas vazias, mouse, teclado, tijolos).\n"
+                                "- Cosmeticos ou higiene (Desodorantes, perfumes, cremes).\n"
+                                "- Quaisquer objetos solidos que NAO contenham comida.\n\n"
+                                "O QUE E PERMITIDO:\n"
+                                "- Pratos de comida, marmitas, alimentos (frutas, carnes, ovos, arroz, massas).\n"
+                                "- Embalagens de alimentos legitimas (saquinho de hamburguer, caixa de pizza, copo de delivery).\n\n"
+                                "PROTOCOLO DE CALCULO REALISTA (SE FOR COMIDA):\n"
+                                "- Analise com rigor tecnico absoluto. Nao subestime calorias.\n"
+                                "- Estime o peso visual de cada item no prato (ex: gramas de arroz, gramas de carne vermelha, porcao de batata frita).\n"
+                                "- Leve em conta metodos de preparo (oleo em frituras como batata frita absorve muita gordura, gordura visivel na carne, azeite ou manteiga).\n"
+                                "- Seja honesto e conservador com os macros para garantir precisao total para quem esta em bulking ou cutting.\n\n"
+                                "Forneca o parecer detalhado em Markdown e, obrigatoriamente, no final de tudo, escreva exatamente assim em duas linhas separadas:\n"
+                                "CALORIAS: [numero total]\nPROTEINA: [numero total]"
+                            ),
+                        },
+                        {
+                            "role": "user",
+                            "content": [
                                 {
-                                    "role": "system",
-                                    "content": (
-                                        "Voce e o nutricionista esportivo mais implacavel e rigoroso do mundo. "
-                                        "Sua missao e analisar a imagem enviada com tolerancia zero para pegadinhas.\n\n"
-                                        "PROTOCOLO DE REJEICAO ABSOLUTA:\n"
-                                        "Se a imagem contiver qualquer um dos itens abaixo, RECUSE IMEDIATAMENTE a analise nutricional, "
-                                        "explique com firmeza o que foi detectado e atribua zero calorias e zero proteina:\n"
-                                        "- Documentos (CNH, RG, CPF, cartoes, papeis).\n"
-                                        "- Eletronicos ou objetos (Power banks, celulares, controles, relogios, copos ou garrafas vazias).\n"
-                                        "- Cosmeticos ou higiene (Desodorantes, perfumes, cremes).\n"
-                                        "- Quaisquer objetos solidos que NAO contenham comida.\n\n"
-                                        "O QUE E PERMITIDO:\n"
-                                        "- Pratos de comida, marmitas, alimentos (frutas, carnes, ovos, arroz, massas).\n"
-                                        "- Embalagens de alimentos legitimas (saquinho de hamburguer, caixa de pizza, copo de delivery).\n\n"
-                                        "Se for comida valida, CONTE visualmente as porcoes e estime o total de calorias e proteinas com precisao realista.\n"
-                                        "Forneca o parecer em Markdown e, obrigatoriamente, no final de tudo, escreva exatamente assim em duas linhas separadas:\n"
-                                        "CALORIAS: [numero total]\nPROTEINA: [numero total]"
-                                    ),
+                                    "type": "text",
+                                    "text": "Analise esta imagem. Se for comida ou embalagem de comida, calcule os macros com precisao realista. Se for objeto ou documento, recuse.",
                                 },
                                 {
-                                    "role": "user",
-                                    "content": [
-                                        {
-                                            "type": "text",
-                                            "text": "Analise esta imagem. Se for comida ou embalagem de comida, calcule os macros. Se for objeto ou documento, recuse."
-                                        },
-                                        {
-                                            "type": "image_url",
-                                            "image_url": {
-                                                "url": f"data:image/jpeg;base64,{img_str}"
-                                            },
-                                        },
-                                    ],
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/jpeg;base64,{img_str}"
+                                    },
                                 },
                             ],
+                        },
+                    ],
                         )
                         resultado_ia = resposta.choices[0].message.content
 
@@ -552,26 +556,30 @@ with aba_exercicios:
             [
                 "Supino Reto com Barra",
                 "Supino Inclinado com Halteres",
-                "Crossover / Polia Alta",
-                "Flexão de Braço Tradicional",
-                "Crucifixo com Halteres no Banco Reto",
+                "Supino Declinado com Barra",
+                "Supino Reto na Máquina",
+                "Crucifixo Reto com Halteres",
+                "Crucifixo Invertido com Halteres",
+                "Crossover na Polia",
+                "Flexão de Braço",
+                "Paralelas para Peito",
             ],
         )
 
-        if "Supino Reto" in ex_peito:
+        if "Supino Reto com Barra" in ex_peito:
             st.markdown("#### 💥 Supino Reto com Barra")
             exibir_foto_exercicio(
-                "supino_reto.jpg", "Anatomia 3D - Peitoral e Tríceps"
+                "supino_reto_com_barra.png", "Anatomia 3D - Peitoral e Tríceps"
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Deite no banco, pés firmes no chão,"
                 " escápulas retraídas. Desça a barra controlando até a linha do"
                 " peito e empurre para cima."
             )
-        elif "Inclinado" in ex_peito:
+        elif "Supino Inclinado com Halteres" in ex_peito:
             st.markdown("#### 💥 Supino Inclinado com Halteres")
             exibir_foto_exercicio(
-                "supino_inclinado _com_ halteres.jpg",
+                "supino_inclinado_com_halteres.png",
                 "Anatomia 3D - Peitoral Superior",
             )
             st.info(
@@ -579,51 +587,88 @@ with aba_exercicios:
                 " dos halteres alongando a parte superior do peito e contraia"
                 " no topo."
             )
-        elif "Crossover" in ex_peito:
-            st.markdown("#### 💥 Crossover / Polia Alta")
+        elif "Supino Declinado com Barra" in ex_peito:
+            st.markdown("#### 💥 Supino Declinado com Barra")
             exibir_foto_exercicio(
-                "crossover_ polia _alta.jpg", "Anatomia 3D - Feixe Sternal"
+                "supino_declinado_com_barra.png", "Anatomia 3D - Peitoral Inferior"
             )
             st.info(
-                "🎯 **Execução (Iniciante):** Em pé no centro dos cabos altos,"
-                " tronco levemente inclinado à frente, cruze os cabos na altura"
-                " do abdômen inferior esmagando o peito."
+                "🎯 **Execução (Iniciante):** Fixe os pés no suporte do banco declinado,"
+                " desça a barra controlando em direção à parte inferior do peito e empurre."
             )
-        elif "Flexão" in ex_peito:
-            st.markdown("#### 💥 Flexão de Braço Tradicional")
+        elif "Supino Reto na Máquina" in ex_peito:
+            st.markdown("#### 💥 Supino Reto na Máquina")
             exibir_foto_exercicio(
-                "flexão_ de_ braço.jpg", "Anatomia 3D - Peitoral e Core"
+                "supino_reto_na_maquina.png", "Anatomia 3D - Peitoral na Máquina"
             )
             st.info(
-                "🎯 **Execução (Iniciante):** Mantenha o corpo alinhado, abdômen"
-                " contraído, desça o peito próximo ao solo e empurre."
+                "🎯 **Execução (Iniciante):** Ajuste a altura do banco para alinhar as manoplas"
+                " com o meio do peito, estenda os braços sem travar os cotovelos e retorne controlando."
             )
-        else:
-            st.markdown("#### 💥 Crucifixo com Halteres no Banco Reto")
+        elif "Crucifixo Reto com Halteres" in ex_peito:
+            st.markdown("#### 💥 Crucifixo Reto com Halteres")
             exibir_foto_exercicio(
-                "crucifixo_ com _halter _no_ banco.jpg",
-                "Anatomia 3D - Isolamento Peitoral",
+                "crucifixo_reto_com_halteres.png", "Anatomia 3D - Isolamento Peitoral"
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Deitado no banco reto, braços"
                 " levemente flexionados, abra os halteres sentindo alongar o"
                 " peitoral e feche em abraço."
             )
+        elif "Crucifixo Invertido" in ex_peito:
+            st.markdown("#### 💥 Crucifixo Invertido com Halteres")
+            exibir_foto_exercicio(
+                "crucifixo_invertido_com_halteres.png", "Anatomia 3D - Deltoide Posterior"
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Tronco inclinado à frente, abra os braços"
+                " controlando o movimento para focar na parte posterior dos ombros e costas."
+            )
+        elif "Crossover" in ex_peito:
+            st.markdown("#### 💥 Crossover na Polia")
+            exibir_foto_exercicio(
+                "crossover_na_polia.png", "Anatomia 3D - Feixe Sternal"
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Em pé no centro dos cabos altos,"
+                " tronco levemente inclinado à frente, cruze os cabos na altura"
+                " do abdômen inferior esmagando o peito."
+            )
+        elif "Flexão de Braço" in ex_peito:
+            st.markdown("#### 💥 Flexão de Braço")
+            exibir_foto_exercicio(
+                "flexao_de_braco.png", "Anatomia 3D - Peitoral e Core"
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Mantenha o corpo alinhado, abdômen"
+                " contraído, desça o peito próximo ao solo e empurre."
+            )
+        else:
+            st.markdown("#### 💥 Paralelas para Peito")
+            exibir_foto_exercicio(
+                "paralelas_para_peito.png", "Anatomia 3D - Peitoral Inferior e Tríceps"
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Projete o tronco levemente à"
+                " frente, desça controlando o peso e empurre para cima."
+            )
 
     elif "Costas" in grupo_muscular:
         ex_costas = st.selectbox(
             "Exercício:",
             [
-                "Puxada Alta na Polia / Pulldown",
+                "Puxada Alta pela Frente",
                 "Remada Curvada com Barra",
-                "Remada Baixa na Polia / Triângulo",
-                "Barra Fixa Pronada / Supinada",
+                "Remada Baixa na Polia",
+                "Remada Unilateral com Haltere",
+                "Barra Fixa",
+                "Hiperextensão Lombar",
             ],
         )
         if "Puxada Alta" in ex_costas:
-            st.markdown("#### 💥 Puxada Alta na Polia / Pulldown")
+            st.markdown("#### 💥 Puxada Alta pela Frente")
             exibir_foto_exercicio(
-                "puxada_alta.jpg", "Anatomia 3D - Grande Dorsal"
+                "puxada_alta_pela_frente.png", "Anatomia 3D - Grande Dorsal"
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Sente com joelhos travados, puxe"
@@ -633,91 +678,175 @@ with aba_exercicios:
         elif "Remada Curvada" in ex_costas:
             st.markdown("#### 💥 Remada Curvada com Barra")
             exibir_foto_exercicio(
-                "remada_curvada.jpg", "Anatomia 3D - Espessura de Dorsal"
+                "remada_curvada_com_barra.png", "Anatomia 3D - Espessura de Dorsal"
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Tronco inclinado a 45°, coluna"
                 " neutra, puxe a barra em direção ao umbigo."
             )
         elif "Remada Baixa" in ex_costas:
-            st.markdown("#### 💥 Remada Baixa na Polia / Triângulo")
+            st.markdown("#### 💥 Remada Baixa na Polia")
             exibir_foto_exercicio(
-                "remada _baixa_na_ polia_ triângulo.jpg",
+                "remada_baixa_na_polia.png",
                 "Anatomia 3D - Meio das Costas na Polia",
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Coluna reta, puxe o triângulo até"
                 " o abdômen mantendo o controle total na volta."
             )
-        else:
-            st.markdown("#### 💥 Barra Fixa Pronada / Supinada")
+        elif "Remada Unilateral" in ex_costas:
+            st.markdown("#### 💥 Remada Unilateral com Haltere")
             exibir_foto_exercicio(
-                "barra_ fixa_ pronada_ supinada.jpg",
+                "remada_unilateral_com_haltere.png", "Anatomia 3D - Dorsal Unilateral"
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Apoie um joelho e a mão no banco, puxe o haltere"
+                " em direção ao quadril mantendo o cotovelo próximo ao corpo."
+            )
+        elif "Barra Fixa" in ex_costas:
+            st.markdown("#### 💥 Barra Fixa")
+            exibir_foto_exercicio(
+                "barra_fixa.png",
                 "Anatomia 3D - Dorsal e Bíceps",
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Puxe o corpo para cima até o"
                 " queixo ultrapassar a barra, controlando a descida."
             )
+        else:
+            st.markdown("#### 💥 Hiperextensão Lombar")
+            exibir_foto_exercicio(
+                "hiperextensao_lombar.png", "Anatomia 3D - Eretores da Espinha"
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Posicione o quadril na borda do aparelho, desça o tronco"
+                " controlando e suba alinhando com as pernas sem hiperestender em excesso."
+            )
 
     elif "Braços" in grupo_muscular:
         ex_braco = st.selectbox(
             "Exercício:",
             [
-                "Rosca Direta com Barra W",
-                "Rosca Alternada com Halteres",
-                "Tríceps na Polia com Corda",
+                "Rosca Direta com Barra W (Scott)",
+                "Rosca Martelo com Halteres",
+                "Rosca Concentrada com Haltere",
+                "Rosca na Polia Baixa",
+                "Tríceps Pulley (Barra Reta)",
+                "Tríceps Pulley (Corda)",
                 "Tríceps Testa com Barra W",
-                "Paralelas no Apoio / Supino Fechado",
+                "Tríceps Coice com Haltere",
+                "Tríceps Francês com Haltere",
+                "Tríceps Mergulho no Banco",
+                "Paralelas para Tríceps",
             ],
         )
-        if "Rosca Direta" in ex_braco:
-            st.markdown("#### 💥 Rosca Direta com Barra W")
+        if "Scott" in ex_braco:
+            st.markdown("#### 💥 Rosca Scott com Barra W")
             exibir_foto_exercicio(
-                "rosca_direta.jpg", "Anatomia 3D - Bíceps Braquial"
+                "rosca_scott.png", "Anatomia 3D - Bíceps Braquial Isolado"
             )
             st.info(
-                "🎯 **Execução (Iniciante):** Cotovelos colados nas costelas,"
-                " suba a barra sem balançar o tronco."
+                "🎯 **Execução (Iniciante):** Apoie os braços no banco Scott, desça controlando"
+                " o peso e suba contraindo o bíceps ao máximo."
             )
-        elif "Rosca Alternada" in ex_braco:
-            st.markdown("#### 💥 Rosca Alternada com Halteres")
+        elif "Rosca Martelo" in ex_braco:
+            st.markdown("#### 💥 Rosca Martelo com Halteres")
             exibir_foto_exercicio(
-                "rosca_ alternada_ com_ halter.jpg",
-                "Anatomia 3D - Bíceps e Antebraço",
+                "rosca_martelo_com_halteres.png",
+                "Anatomia 3D - Bíceps e Braquial",
             )
             st.info(
-                "🎯 **Execução (Iniciante):** Alterne os braços fazendo"
-                " supinação no topo."
+                "🎯 **Execução (Iniciante):** Mantenha as palmas das mãos viradas uma para a outra"
+                " durante todo o movimento para focar no braquial e antebraço."
             )
-        elif "Tríceps na Polia" in ex_braco:
-            st.markdown("#### 💥 Tríceps na Polia com Corda")
+        elif "Rosca Concentrada" in ex_braco:
+            st.markdown("#### 💥 Rosca Concentrada com Haltere")
             exibir_foto_exercicio(
-                "tríceps_ na_ polia_ com-corda.jpg",
-                "Anatomia 3D - Tríceps (Cabeças)",
+                "rosca_concentrada.png",
+                "Anatomia 3D - Pico do Bíceps",
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Sentado no banco, apoie o cotovelo na parte interna"
+                " da coxa e flexione o braço focando na contração máxima."
+            )
+        elif "Rosca na Polia Baixa" in ex_braco:
+            st.markdown("#### 💥 Rosca na Polia Baixa")
+            exibir_foto_exercicio(
+                "rosca_na_polia_baixa.png",
+                "Anatomia 3D - Bíceps com Tensão Contínua",
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Segure a barra na polia baixa com cotovelos fixos"
+                " e puxe em direção ao peito mantendo a tensão do cabo."
+            )
+        elif "Barra Reta" in ex_braco:
+            st.markdown("#### 💥 Tríceps Pulley (Barra Reta)")
+            exibir_foto_exercicio(
+                "triceps_pulley_barra.png",
+                "Anatomia 3D - Tríceps (Cabeças Lateral e Medial)",
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Cotovelos fixos ao lado do corpo,"
-                " empurre para baixo abrindo as pontas da corda no final."
+                " empurre a barra reta para baixo estendendo totalmente os braços."
+            )
+        elif "Corda" in ex_braco:
+            st.markdown("#### 💥 Tríceps Pulley (Corda)")
+            exibir_foto_exercicio(
+                "triceps_pulley_corda.png",
+                "Anatomia 3D - Tríceps com Ênfase Lateral",
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Puxe a corda para baixo abrindo as pontas"
+                " no final do movimento para contrair ao máximo o tríceps."
             )
         elif "Tríceps Testa" in ex_braco:
             st.markdown("#### 💥 Tríceps Testa com Barra W")
             exibir_foto_exercicio(
-                "tríceps_ testa _com_ Barra_ W.jpg",
+                "triceps_testa.png",
                 "Anatomia 3D - Tríceps (Cabeça Longa)",
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Deitado no banco, flexione os"
                 " cotovelos levando a barra em direção à testa e estenda."
             )
-        else:
-            st.markdown("#### 💥 Paralelas no Apoio / Supino Fechado")
+        elif "Coice" in ex_braco:
+            st.markdown("#### 💥 Tríceps Coice com Haltere")
             exibir_foto_exercicio(
-                "supino_ fechado.jpg", "Anatomia 3D - Tríceps e Peitoral"
+                "triceps_coice.png",
+                "Anatomia 3D - Isolamento de Tríceps",
             )
             st.info(
-                "🎯 **Execução (Iniciante):** Projete o tronco levemente à"
-                " frente, desça controlando o peso e empurre para cima."
+                "🎯 **Execução (Iniciante):** Com o tronco apoiado no banco, estique o braço"
+                " para trás mantendo o cotovelo alto e fixo."
+            )
+        elif "Francês" in ex_braco:
+            st.markdown("#### 💥 Tríceps Francês com Haltere")
+            exibir_foto_exercicio(
+                "triceps_frances.png",
+                "Anatomia 3D - Tríceps Cabeça Longa",
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Sentado, segure o haltere atrás da cabeça"
+                " e estenda os braços para cima controlando o movimento."
+            )
+        elif "Mergulho no Banco" in ex_braco:
+            st.markdown("#### 💥 Tríceps Mergulho no Banco")
+            exibir_foto_exercicio(
+                "triceps_mergulho_banco.png",
+                "Anatomia 3D - Tríceps e Ombro Anterior",
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Mãos apoiadas na borda do banco, pernas estendidas,"
+                " desça flexionando os braços e empurre para cima."
+            )
+        else:
+            st.markdown("#### 💥 Paralelas para Tríceps")
+            exibir_foto_exercicio(
+                "paralelas_para_triceps.png", "Anatomia 3D - Tríceps na Paralela"
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Mantenha o corpo mais vertical para focar nos tríceps,"
+                " desça controlando e empurre."
             )
 
     elif "Ombros" in grupo_muscular:
@@ -725,24 +854,36 @@ with aba_exercicios:
             "Exercício:",
             [
                 "Desenvolvimento com Halteres",
-                "Elevação Lateral com Halteres / Polia",
                 "Desenvolvimento Militar com Barra",
+                "Elevação Lateral com Halteres",
+                "Elevação Frontal com Halteres",
+                "Remada Alta com Barra",
             ],
         )
         if "Desenvolvimento com Halteres" in ex_ombro:
             st.markdown("#### 💥 Desenvolvimento com Halteres")
             exibir_foto_exercicio(
-                "desenvolvimento_ com_ halteres.jpg",
-                "Anatomia 3D - Deltóides",
+                "desenvolvimento_com_halteres.png",
+                "Anatomia 3D - Deltóides Completo",
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Sentado com apoio, halteres na"
                 " altura dos ombros, empurre para cima acima da cabeça."
             )
-        elif "Elevação Lateral" in ex_ombro:
-            st.markdown("#### 💥 Elevação Lateral com Halteres / Polia")
+        elif "Militar" in ex_ombro:
+            st.markdown("#### 💥 Desenvolvimento Militar com Barra")
             exibir_foto_exercicio(
-                "elevação_ lateral_ com _halter _polia.jpg",
+                "desenvolvimento_militar_com_barra.png",
+                "Anatomia 3D - Deltoide Anterior e Core",
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Empurre a barra por cima da"
+                " cabeça mantendo o abdômen contraído."
+            )
+        elif "Lateral" in ex_ombro:
+            st.markdown("#### 💥 Elevação Lateral com Halteres")
+            exibir_foto_exercicio(
+                "elevacao_lateral_com_halteres.png",
                 "Anatomia 3D - Deltóide Lateral",
             )
             st.info(
@@ -750,15 +891,25 @@ with aba_exercicios:
                 " lateralmente até a altura dos ombros com leve flexão nos"
                 " cotovelos."
             )
-        else:
-            st.markdown("#### 💥 Desenvolvimento Militar com Barra")
+        elif "Frontal" in ex_ombro:
+            st.markdown("#### 💥 Elevação Frontal com Halteres")
             exibir_foto_exercicio(
-                "desenvolvimento _militar _com _barras.jpg",
-                "Anatomia 3D - Deltoide Anterior e Core",
+                "elevacao_frontal_com_halteres.png",
+                "Anatomia 3D - Deltóide Anterior",
             )
             st.info(
-                "🎯 **Execução (Iniciante):** Empurre a barra por cima da"
-                " cabeça mantendo o abdômen contraído."
+                "🎯 **Execução (Iniciante):** Eleve o haltere à frente do corpo até a altura"
+                " dos olhos de forma controlada."
+            )
+        else:
+            st.markdown("#### 💥 Remada Alta com Barra")
+            exibir_foto_exercicio(
+                "remada_alta_com_barra.png",
+                "Anatomia 3D - Trapézio e Deltoide Medial",
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Puxe a barra rente ao corpo elevando os cotovelos"
+                " em direção ao teto, controlando a descida."
             )
 
     else:
@@ -767,17 +918,19 @@ with aba_exercicios:
             [
                 "Agachamento Livre com Barra",
                 "Leg Press 45°",
-                "Cadeira Extensora",
-                "Stiff com Barra / Halteres",
-                "Mesa Flexora",
-                "Afundo / Passada com Halteres",
+                "Extensão de Pernas na Cadeira",
+                "Flexão de Pernas Deitado (Mesa Flexora)",
+                "Levantamento Terra Stiff",
+                "Levantamento Terra",
+                "Ponte de Glúteo com Barra",
+                "Afundo com Halteres",
                 "Panturrilha em Pé na Máquina",
             ],
         )
         if "Agachamento" in ex_perna:
             st.markdown("#### 💥 Agachamento Livre com Barra")
             exibir_foto_exercicio(
-                "agachamento.jpg", "Anatomia 3D - Quadríceps e Glúteos"
+                "agachamento_livre_com_barra.png", "Anatomia 3D - Quadríceps e Glúteos"
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Posicione a barra nos trapézios,"
@@ -787,45 +940,63 @@ with aba_exercicios:
         elif "Leg Press" in ex_perna:
             st.markdown("#### 💥 Leg Press 45°")
             exibir_foto_exercicio(
-                "leg_press.jpg", "Anatomia 3D - Quadríceps"
+                "leg_press_45.png", "Anatomia 3D - Quadríceps"
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Pés na largura dos ombros na"
                 " plataforma, desça controlando sem tirar a lombar do"
                 " encosto."
             )
-        elif "Cadeira Extensora" in ex_perna:
-            st.markdown("#### 💥 Cadeira Extensora")
+        elif "Extensão" in ex_perna:
+            st.markdown("#### 💥 Extensão de Pernas na Cadeira")
             exibir_foto_exercicio(
-                "cadeira_ extensora.jpg", "Anatomia 3D - Isolamento Quadríceps"
+                "extensao_de_pernas_cadeira.png", "Anatomia 3D - Isolamento Quadríceps"
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Sente com o joelho alinhado ao"
                 " eixo, estenda a perna completamente e segure 1 segundo no"
                 " topo."
             )
-        elif "Stiff" in ex_perna:
-            st.markdown("#### 💥 Stiff com Barra / Halteres")
+        elif "Flexão" in ex_perna:
+            st.markdown("#### 💥 Flexão de Pernas Deitado")
             exibir_foto_exercicio(
-                "stiff.jpg", "Anatomia 3D - Posteriores de Coxa"
-            )
-            st.info(
-                "🎯 **Execução (Iniciante):** Pernas semi-estendidas, faça a"
-                " dobradiça de quadril descendo o peso rente às pernas."
-            )
-        elif "Mesa Flexora" in ex_perna:
-            st.markdown("#### 💥 Mesa Flexora")
-            exibir_foto_exercicio(
-                "mesa _flexora.jpg", "Anatomia 3D - Isquiotibiais"
+                "flexao_de_pernas_deitado.png", "Anatomia 3D - Isquiotibiais"
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Deitado de bruços, flexione os"
                 " joelhos puxando o calcanhar em direção aos glúteos."
             )
-        elif "Afundo" in ex_perna:
-            st.markdown("#### 💥 Afundo / Passada com Halteres")
+        elif "Stiff" in ex_perna:
+            st.markdown("#### 💥 Levantamento Terra Stiff")
             exibir_foto_exercicio(
-                "afundamento_ com _halteres.jpg",
+                "levantamento_terra_stiff.png", "Anatomia 3D - Posteriores de Coxa"
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Pernas semi-estendidas, faça a"
+                " dobradiça de quadril descendo o peso rente às pernas."
+            )
+        elif "Terra" in ex_perna:
+            st.markdown("#### 💥 Levantamento Terra")
+            exibir_foto_exercicio(
+                "levantamento_terra.png", "Anatomia 3D - Cadeia Posterior Completa"
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Mantenha a coluna neutra, empurre o chão com as"
+                " pernas e estenda o quadril erguendo a barra rente às canelas."
+            )
+        elif "Ponte" in ex_perna:
+            st.markdown("#### 💥 Ponte de Glúteo com Barra")
+            exibir_foto_exercicio(
+                "ponte_de_glutéo_com_barra.png", "Anatomia 3D - Glúteo Máximo"
+            )
+            st.info(
+                "🎯 **Execução (Iniciante):** Apoiado com as costas no banco e barra sobre o quadril,"
+                " eleve a bacia contraindo bem os glúteos no topo."
+            )
+        elif "Afundo" in ex_perna:
+            st.markdown("#### 💥 Afundo com Halteres")
+            exibir_foto_exercicio(
+                "afundo_com_halteres.png",
                 "Anatomia 3D - Pernas e Equilíbrio",
             )
             st.info(
@@ -835,12 +1006,12 @@ with aba_exercicios:
         else:
             st.markdown("#### 💥 Panturrilha em Pé na Máquina")
             exibir_foto_exercicio(
-                "panturrilha_ em_ p\u00e9_ na_ máquina.jpg",
+                "panturrilha_em_pe_na_maquina.png",
                 "Anatomia 3D - Panturrilhas",
             )
             st.info(
                 "🎯 **Execução (Iniciante):** Apoie os ombros na máquina, deixe"
-                " o calcanhar baixar para alongar bem embaixo e suba na ponta"
+                " o calcanhar baixo para alongar bem embaixo e suba na ponta"
                 " dos pés."
             )
 
